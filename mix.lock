@@ -1,0 +1,3 @@
+%{
+  "zoi": {:hex, :zoi, "0.18.4", "849c1ccdf69a4a7b7b6c2e41766312bcc4edf1e0af5bfb9f2f3d98234191b8ef", [:mix], [{:decimal, "~> 2.0 or ~> 3.0", [hex: :decimal, repo: "hexpm", optional: true]}, {:phoenix_html, "~> 2.14.2 or ~> 3.0 or ~> 4.1", [hex: :phoenix_html, repo: "hexpm", optional: true]}], "hexpm", "587fb221824ae7343fca3af90b8a4c53ac5cf9019891cf3aba215b43be2ba05d"},
+}
