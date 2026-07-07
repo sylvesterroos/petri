@@ -81,12 +81,19 @@ defmodule TSP do
       Petri.run(fitness, %{
         encoding: :permutation,
         n: length(@cities),
-        population_size: 200,
-        max_generations: 500,
-        crossover: :ox,
-        mutation: :inversion,
+        population_size: 400,
+        max_generations: 1000,
         seed: 67,
-        elitism: true
+        # Tournament selection focuses search on the fittest individuals,
+        # which is helpful for TSP where small tour-length improvements are
+        # hard to find by chance.
+        selection: :tournament,
+        tournament_size: 5,
+        # Preserve a small set of the best tours each generation so good
+        # edge collections are not destroyed by crossover or mutation.
+        elite_count: 8,
+        crossover: :ox,
+        mutation: :inversion
       })
 
     {best_tour, best_fitness} = result.best

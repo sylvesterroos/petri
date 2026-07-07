@@ -35,7 +35,7 @@ defmodule Petri.ConfigTest do
       assert config.selection == :sus
       assert config.crossover == :pmx
       assert config.mutation == :swap
-      assert config.elitism == true
+      assert config.elite_count == 2
       assert config.crossover_rate == 0.9
       assert config.mutation_rate == 0.1
     end

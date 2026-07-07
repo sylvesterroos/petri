@@ -8,8 +8,9 @@ defmodule Petri.Config do
     stagnation_generations: Z.integer() |> Z.gte(1) |> Z.optional(),
     time_budget_ms: Z.integer() |> Z.gte(1) |> Z.optional(),
     selection: Z.enum([:tournament, :roulette, :rank, :sus]) |> Z.default(:sus),
+    tournament_size: Z.integer() |> Z.gte(1) |> Z.optional(),
     seed: Z.integer() |> Z.optional(),
-    elitism: Z.boolean() |> Z.default(true),
+    elite_count: Z.integer() |> Z.gte(0) |> Z.default(2),
     crossover_rate: Z.float() |> Z.gte(0.0) |> Z.lte(1.0) |> Z.default(0.9),
     mutation_rate: Z.float() |> Z.gte(0.0) |> Z.lte(1.0) |> Z.default(0.1)
   }

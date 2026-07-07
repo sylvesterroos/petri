@@ -3,6 +3,7 @@ defmodule Petri.Selection do
       when is_atom(selection) and is_list(population) and is_map(config) do
     case selection do
       :sus -> stochastic_universal_sampling(population, config)
+      :tournament -> tournament_selection(population, config)
     end
   end
 
@@ -27,6 +28,18 @@ defmodule Petri.Selection do
       end
 
     Enum.map(pointers, &select_one(population, &1))
+  end
+
+  def tournament_selection(population, config)
+      when is_list(population) and is_map(config) do
+    if length(population) == 0, do: raise(ArgumentError, "empty population")
+    n = Map.fetch!(config, :population_size)
+    tournament_size = Map.get(config, :tournament_size, 3)
+
+    Enum.map(1..n, fn _ ->
+      contestants = Enum.take_random(population, tournament_size)
+      Enum.max_by(contestants, fn {_, fitness} -> fitness end)
+    end)
   end
 
   ## Helpers

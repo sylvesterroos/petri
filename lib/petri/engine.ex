@@ -81,7 +81,7 @@ defmodule Petri.Engine do
   end
 
   defp reproduce(parents, config) do
-    target = if config.elitism, do: config.population_size - 1, else: config.population_size
+    target = config.population_size - config.elite_count
 
     parents
     |> Stream.chunk_every(2)
@@ -93,7 +93,7 @@ defmodule Petri.Engine do
       [p] ->
         [elem(p, 0)]
     end)
-    |> Enum.take(target)
+    |> Enum.take(max(target, 0))
   end
 
   defp crossover_pair({c0, _}, {c1, _}, %{encoding: :permutation, crossover: crossover, crossover_rate: rate} = config) do
@@ -112,13 +112,14 @@ defmodule Petri.Engine do
     end
   end
 
-  defp replace(population, offspring, %{population_size: _size, elitism: true}) do
-    best_parent = Enum.max_by(population, fn {_, fitness} -> fitness end)
-    [best_parent | offspring]
-  end
+  defp replace(population, offspring, %{population_size: size, elite_count: elite_count}) do
+    elites =
+      population
+      |> Enum.sort_by(fn {_, fitness} -> fitness end, :desc)
+      |> Enum.take(elite_count)
 
-  defp replace(_population, offspring, %{population_size: size, elitism: false}) do
-    Enum.take(offspring, size)
+    offspring_needed = size - length(elites)
+    elites ++ Enum.take(offspring, offspring_needed)
   end
 
   defp update_best(generation_best, best, state) do

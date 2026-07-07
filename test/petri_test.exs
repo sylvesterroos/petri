@@ -21,7 +21,7 @@ defmodule PetriTest do
       assert config.selection == :sus
       assert config.crossover == :pmx
       assert config.mutation == :swap
-      assert config.elitism == true
+      assert config.elite_count == 2
     end
 
     test "preserves explicit permutation operator choices" do
@@ -34,14 +34,14 @@ defmodule PetriTest do
                  selection: :tournament,
                  crossover: :ox,
                  mutation: :inversion,
-                 elitism: false,
+                 elite_count: 0,
                  seed: 42
                })
 
       assert config.selection == :tournament
       assert config.crossover == :ox
       assert config.mutation == :inversion
-      assert config.elitism == false
+      assert config.elite_count == 0
       assert config.seed == 42
     end
 
@@ -120,7 +120,8 @@ defmodule PetriTest do
       assert %Result{} = result
       assert result.generations_run == 3
       assert length(result.history) == 4
-      assert result.evaluations == 10 + 3 * 9
+      # 10 initial evaluations + 8 offspring per generation with elite_count=2.
+      assert result.evaluations == 10 + 3 * 8
     end
 
     test "validates a raw config map before running" do
@@ -216,8 +217,8 @@ defmodule PetriTest do
           }
         )
 
-      # 10 initial evaluations plus 9 offspring per generation with elitism.
-      assert result.evaluations == 10 + result.generations_run * 9
+      # 10 initial evaluations plus 8 offspring per generation with elite_count=2.
+      assert result.evaluations == 10 + result.generations_run * 8
     end
   end
 

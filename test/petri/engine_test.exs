@@ -85,6 +85,7 @@ defmodule Petri.EngineTest do
             n: 5,
             population_size: 10,
             max_generations: 3,
+            elite_count: 1,
             seed: 42
           }
         )
