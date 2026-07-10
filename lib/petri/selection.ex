@@ -4,6 +4,8 @@ defmodule Petri.Selection do
     case selection do
       :sus -> stochastic_universal_sampling(population, config)
       :tournament -> tournament_selection(population, config)
+      :roulette -> roulette_selection(population, config)
+      :rank -> rank_selection(population, config)
     end
   end
 
@@ -42,6 +44,42 @@ defmodule Petri.Selection do
     end)
   end
 
+  def roulette_selection(population, config)
+      when is_list(population) and is_map(config) do
+    if length(population) == 0, do: raise(ArgumentError, "empty population")
+    n = Map.fetch!(config, :population_size)
+
+    total_fitness =
+      Enum.reduce(population, 0.0, fn {_, fitness}, acc ->
+        if fitness < 0.0, do: raise(ArgumentError, "negative fitness: #{fitness}")
+        acc + fitness
+      end)
+
+    if total_fitness == 0.0, do: raise(ArgumentError, "total fitness is zero")
+
+    Enum.map(1..n, fn _ ->
+      pointer = :rand.uniform() * total_fitness
+      select_one(population, pointer)
+    end)
+  end
+
+  def rank_selection(population, config)
+      when is_list(population) and is_map(config) do
+    if length(population) == 0, do: raise(ArgumentError, "empty population")
+    n = Map.fetch!(config, :population_size)
+
+    sorted = Enum.sort_by(population, fn {_, fitness} -> fitness end)
+
+    # Rank i (1-indexed) gets weight i, so total weight = n(n+1)/2.
+    # The best (last) individual is n times more likely than the worst.
+    total_weight = n * (n + 1) / 2
+
+    Enum.map(1..n, fn _ ->
+      pointer = :rand.uniform() * total_weight
+      select_ranked(sorted, pointer)
+    end)
+  end
+
   ## Helpers
 
   defp select_one(population, pointer) do
@@ -54,5 +92,20 @@ defmodule Petri.Selection do
         {:cont, next}
       end
     end)
+  end
+
+  defp select_ranked(sorted, pointer) do
+    {selected, _} =
+      Enum.reduce_while(Enum.with_index(sorted, 1), 0.0, fn {item, rank}, acc ->
+        next = acc + rank
+
+        if next >= pointer do
+          {:halt, {item, next}}
+        else
+          {:cont, next}
+        end
+      end)
+
+    selected
   end
 end
