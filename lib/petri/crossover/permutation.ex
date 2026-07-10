@@ -13,6 +13,12 @@ defmodule Petri.Crossover.Permutation do
     {%Permutation{genes: c0_genes}, %Permutation{genes: c1_genes}}
   end
 
+  def cx(%Permutation{genes: p0}, %Permutation{genes: p1}, _config)
+      when is_list(p0) and is_list(p1) do
+    {c0_genes, c1_genes} = cx_genes(p0, p1)
+    {%Permutation{genes: c0_genes}, %Permutation{genes: c1_genes}}
+  end
+
   ## Order Crossover (OX)
 
   defp ox_genes(p0, p1, _config) do
@@ -147,5 +153,34 @@ defmodule Petri.Crossover.Permutation do
       end)
 
     :array.to_list(child)
+  end
+
+  ## Cycle Crossover (CX)
+
+  defp cx_genes(p0, p1) do
+    n = length(p0)
+    pos_in_p1 = Map.new(Enum.with_index(p1), fn {v, i} -> {v, i} end)
+
+    cycle =
+      Stream.iterate(0, fn i -> Map.fetch!(pos_in_p1, Enum.at(p0, i)) end)
+      |> Enum.reduce_while(MapSet.new(), fn i, acc ->
+        if MapSet.member?(acc, i) do
+          {:halt, acc}
+        else
+          {:cont, MapSet.put(acc, i)}
+        end
+      end)
+
+    c0 =
+      for i <- 0..(n - 1) do
+        if MapSet.member?(cycle, i), do: Enum.at(p0, i), else: Enum.at(p1, i)
+      end
+
+    c1 =
+      for i <- 0..(n - 1) do
+        if MapSet.member?(cycle, i), do: Enum.at(p1, i), else: Enum.at(p0, i)
+      end
+
+    {c0, c1}
   end
 end

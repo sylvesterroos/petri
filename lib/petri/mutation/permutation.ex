@@ -33,4 +33,19 @@ defmodule Petri.Mutation.Permutation do
       }
     end
   end
+
+  def insert(%Permutation{genes: genes} = chromosome, _config) do
+    n = length(genes)
+
+    if n <= 1 do
+      chromosome
+    else
+      from = :rand.uniform(n) - 1
+      to = :rand.uniform(n) - 1
+      value = Enum.at(genes, from)
+      without = List.delete_at(genes, from)
+      inserted = List.insert_at(without, to, value)
+      %{chromosome | genes: inserted}
+    end
+  end
 end

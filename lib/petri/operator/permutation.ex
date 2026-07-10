@@ -11,12 +11,12 @@ defmodule Petri.Operator.Permutation do
   """
   def crossover(:ox), do: &Crossover.ox/3
   def crossover(:pmx), do: &Crossover.pmx/3
-  # def crossover(:cx), do: &Crossover.cx/3
+  def crossover(:cx), do: &Crossover.cx/3
 
   @doc """
   Returns the mutation function for the given permutation operator name.
   """
   def mutation(:inversion), do: &Mutation.inversion/2
   def mutation(:swap), do: &Mutation.swap/2
-  # def mutation(:insert), do: &Mutation.insert/2
+  def mutation(:insert), do: &Mutation.insert/2
 end
