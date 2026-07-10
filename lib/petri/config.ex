@@ -29,7 +29,11 @@ defmodule Petri.Config do
             encoding: Z.literal(:real),
             bounds: Z.any(),
             crossover: Z.enum([:blx_alpha, :sbx]) |> Z.default(:blx_alpha),
-            mutation: Z.enum([:gaussian, :uniform]) |> Z.default(:gaussian)
+            mutation: Z.enum([:gaussian, :uniform]) |> Z.default(:gaussian),
+            blx_alpha_param: Z.float() |> Z.gte(0.0) |> Z.default(0.5),
+            sbx_eta: Z.float() |> Z.gte(1.0) |> Z.default(2.0),
+            gaussian_sigma: Z.float() |> Z.gte(0.0) |> Z.default(0.1),
+            mutation_per_gene_rate: Z.float() |> Z.gte(0.0) |> Z.lte(1.0) |> Z.optional()
           })
         )
 

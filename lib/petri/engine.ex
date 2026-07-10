@@ -5,7 +5,6 @@ defmodule Petri.Engine do
   alias Petri.Termination
   alias Petri.Selection
   alias Petri.Recorder
-  alias Petri.Operator
   alias Petri.Result
 
   def run(fitness_fn, config) do
@@ -22,6 +21,7 @@ defmodule Petri.Engine do
     evaluated = evaluate(population, fitness_fn, 0)
 
     best = Enum.max_by(evaluated, fn {_, fitness} -> fitness end)
+
     history = [Recorder.record(evaluated)]
 
     initial_state = %State{
@@ -29,6 +29,7 @@ defmodule Petri.Engine do
       best_fitness: elem(best, 1),
       last_improvement_generation: 0,
       elapsed_ms: 0,
+      started_at_ms: System.monotonic_time(:millisecond),
       evaluations: config.population_size
     }
 
@@ -46,6 +47,8 @@ defmodule Petri.Engine do
   end
 
   defp loop(population, best, history, state, config, fitness_fn) do
+    state = %{state | elapsed_ms: System.monotonic_time(:millisecond) - state.started_at_ms}
+
     if Termination.stop?(config, state) do
       {best, Enum.reverse(history), state}
     else
@@ -98,7 +101,23 @@ defmodule Petri.Engine do
 
   defp crossover_pair({c0, _}, {c1, _}, %{encoding: :permutation, crossover: crossover, crossover_rate: rate} = config) do
     if :rand.uniform() <= rate do
-      Operator.Permutation.crossover(crossover).(c0, c1, config)
+      Petri.Operator.Permutation.crossover(crossover).(c0, c1, config)
+    else
+      {c0, c1}
+    end
+  end
+
+  defp crossover_pair({c0, _}, {c1, _}, %{encoding: :real, crossover: crossover, crossover_rate: rate} = config) do
+    if :rand.uniform() <= rate do
+      Petri.Operator.Real.crossover(crossover).(c0, c1, config)
+    else
+      {c0, c1}
+    end
+  end
+
+  defp crossover_pair({c0, _}, {c1, _}, %{encoding: :binary, crossover: crossover, crossover_rate: rate} = config) do
+    if :rand.uniform() <= rate do
+      Petri.Operator.Binary.crossover(crossover).(c0, c1, config)
     else
       {c0, c1}
     end
@@ -106,7 +125,23 @@ defmodule Petri.Engine do
 
   defp mutate(chromosome, %{encoding: :permutation, mutation: mutation, mutation_rate: rate} = config) do
     if :rand.uniform() <= rate do
-      Operator.Permutation.mutation(mutation).(chromosome, config)
+      Petri.Operator.Permutation.mutation(mutation).(chromosome, config)
+    else
+      chromosome
+    end
+  end
+
+  defp mutate(chromosome, %{encoding: :real, mutation: mutation, mutation_rate: rate} = config) do
+    if :rand.uniform() <= rate do
+      Petri.Operator.Real.mutation(mutation).(chromosome, config)
+    else
+      chromosome
+    end
+  end
+
+  defp mutate(chromosome, %{encoding: :binary, mutation: mutation, mutation_rate: rate} = config) do
+    if :rand.uniform() <= rate do
+      Petri.Operator.Binary.mutation(mutation).(chromosome, config)
     else
       chromosome
     end
