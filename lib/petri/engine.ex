@@ -12,11 +12,9 @@ defmodule Petri.Engine do
 
     RNG.maybe_seed(config)
 
-    %{population_size: population_size, encoding: encoding} = config
+    %{encoding: encoding} = config
 
-    population =
-      Stream.repeatedly(fn -> Initialization.init_random(encoding, config) end)
-      |> Enum.take(population_size)
+    population = init_population(config, encoding)
 
     evaluated = evaluate(population, fitness_fn, 0)
 
@@ -43,6 +41,17 @@ defmodule Petri.Engine do
     case Petri.Config.parse(raw_config) do
       {:ok, config} -> config
       {:error, errors} -> raise ArgumentError, "invalid config: #{inspect(errors)}"
+    end
+  end
+
+  defp init_population(config, encoding) do
+    strategy = Map.get(config, :initialization, :random)
+
+    if strategy == :lhs and encoding == :real do
+      Initialization.init_latin_hypercube(config)
+    else
+      Stream.repeatedly(fn -> Initialization.init_random(encoding, config) end)
+      |> Enum.take(config.population_size)
     end
   end
 

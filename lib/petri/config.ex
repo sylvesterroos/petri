@@ -28,6 +28,7 @@ defmodule Petri.Config do
           Map.merge(@base, %{
             encoding: Z.literal(:real),
             bounds: Z.any(),
+            initialization: Z.enum([:random, :lhs]) |> Z.default(:random),
             crossover: Z.enum([:blx_alpha, :sbx]) |> Z.default(:blx_alpha),
             mutation: Z.enum([:gaussian, :uniform]) |> Z.default(:gaussian),
             blx_alpha_param: Z.float() |> Z.gte(0.0) |> Z.default(0.5),
