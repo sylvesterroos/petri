@@ -57,6 +57,7 @@ defmodule Petri.Crossover.Permutation.OXTest do
         Enum.any?(@validity_seeds, fn seed ->
           seed(seed)
           {o0, o1} = Crossover.ox(@p0, @p1, %{})
+
           o0.genes != @p0.genes and o0.genes != @p1.genes and
             o1.genes != @p0.genes and o1.genes != @p1.genes
         end)

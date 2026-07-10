@@ -108,7 +108,11 @@ defmodule Petri.Engine do
     |> Enum.take(max(target, 0))
   end
 
-  defp crossover_pair({c0, _}, {c1, _}, %{encoding: :permutation, crossover: crossover, crossover_rate: rate} = config) do
+  defp crossover_pair(
+         {c0, _},
+         {c1, _},
+         %{encoding: :permutation, crossover: crossover, crossover_rate: rate} = config
+       ) do
     if :rand.uniform() <= rate do
       Petri.Operator.Permutation.crossover(crossover).(c0, c1, config)
     else
@@ -116,7 +120,11 @@ defmodule Petri.Engine do
     end
   end
 
-  defp crossover_pair({c0, _}, {c1, _}, %{encoding: :real, crossover: crossover, crossover_rate: rate} = config) do
+  defp crossover_pair(
+         {c0, _},
+         {c1, _},
+         %{encoding: :real, crossover: crossover, crossover_rate: rate} = config
+       ) do
     if :rand.uniform() <= rate do
       Petri.Operator.Real.crossover(crossover).(c0, c1, config)
     else
@@ -124,7 +132,11 @@ defmodule Petri.Engine do
     end
   end
 
-  defp crossover_pair({c0, _}, {c1, _}, %{encoding: :binary, crossover: crossover, crossover_rate: rate} = config) do
+  defp crossover_pair(
+         {c0, _},
+         {c1, _},
+         %{encoding: :binary, crossover: crossover, crossover_rate: rate} = config
+       ) do
     if :rand.uniform() <= rate do
       Petri.Operator.Binary.crossover(crossover).(c0, c1, config)
     else
@@ -132,7 +144,10 @@ defmodule Petri.Engine do
     end
   end
 
-  defp mutate(chromosome, %{encoding: :permutation, mutation: mutation, mutation_rate: rate} = config) do
+  defp mutate(
+         chromosome,
+         %{encoding: :permutation, mutation: mutation, mutation_rate: rate} = config
+       ) do
     if :rand.uniform() <= rate do
       Petri.Operator.Permutation.mutation(mutation).(chromosome, config)
     else
