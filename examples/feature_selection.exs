@@ -1,3 +1,5 @@
+Mix.install([{:petri, path: "."}, :nx])
+
 defmodule FeatureSelection do
   @moduledoc """
   Selects informative features from a synthetic dataset using a binary-coded

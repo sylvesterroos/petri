@@ -25,8 +25,7 @@ defmodule Petri.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:zoi, "~> 0.18"},
-      {:nx, "~> 0.12", only: [:dev, :test]}
+      {:zoi, "~> 0.18"}
     ]
   end
 end

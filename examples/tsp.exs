@@ -1,3 +1,5 @@
+Mix.install([{:petri, path: "."}, :nx])
+
 defmodule TSP do
   @moduledoc """
   Solves the Berlin52 TSP instance with Petri.

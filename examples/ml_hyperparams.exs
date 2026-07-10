@@ -1,3 +1,5 @@
+Mix.install([{:petri, path: "."}, :nx])
+
 defmodule MLHyperparams do
   @moduledoc """
   Tunes learning rate, L2 regularization, and training epochs for a linear
