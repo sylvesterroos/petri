@@ -1,6 +1,8 @@
 defmodule Petri.ConfigTest do
   use ExUnit.Case, async: true
 
+  doctest Petri.Config
+
   alias Petri.Config
 
   describe "parse/1" do

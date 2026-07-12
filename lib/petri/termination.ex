@@ -1,6 +1,21 @@
 defmodule Petri.Termination do
+  @moduledoc """
+  Stop conditions for the generational loop.
+
+  Any one condition being met halts the run. At least one termination
+  condition must be configured (enforced by `Petri.Config`).
+
+  ## Conditions
+
+    * `max_generations` — stop after this many generations
+    * `fitness_threshold` — stop when best fitness reaches this value
+    * `stagnation_generations` — stop if no improvement for this many generations
+    * `time_budget_ms` — stop after this many milliseconds elapsed
+  """
+
   alias Petri.State
 
+  @doc false
   def stop?(config, %State{} = state) do
     max_generations = Map.get(config, :max_generations)
     fitness_threshold = Map.get(config, :fitness_threshold)

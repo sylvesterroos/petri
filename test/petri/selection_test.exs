@@ -1,6 +1,8 @@
 defmodule Petri.SelectionTest do
   use ExUnit.Case, async: true
 
+  doctest Petri.Selection
+
   import Petri.TestHelpers
 
   alias Petri.Selection

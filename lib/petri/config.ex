@@ -1,4 +1,33 @@
 defmodule Petri.Config do
+  @moduledoc """
+  Typed config validation for `Petri.run/2`.
+
+  Uses [Zoi](https://hexdocs.pm/zoi) to validate the config map
+  against a typed schema. Invalid configs return `{:error, reasons}`.
+
+  ## Encoding-specific schemas
+
+  The schema is a discriminated union on `:encoding`. Fields shared across
+  all encodings live in a common base; encoding-specific fields (`:bounds`,
+  `:crossover`, `:mutation`, etc.) are added per variant.
+
+  ## Example
+
+      iex> {:ok, config} = Petri.Config.parse(%{
+      ...>   encoding: :binary, length: 8,
+      ...>   population_size: 20, max_generations: 10
+      ...> })
+      iex> config.encoding
+      :binary
+
+      iex> {:error, err} = Petri.Config.parse(%{
+      ...>   encoding: :binary, length: 8,
+      ...>   population_size: 0, max_generations: 10
+      ...> })
+      iex> is_list(err)
+      true
+  """
+
   alias Zoi, as: Z
 
   @base %{
@@ -50,6 +79,11 @@ defmodule Petri.Config do
 
   @schema Z.discriminated_union(:encoding, [@permutation, @real, @binary])
 
+  @doc """
+  Parses and validates a map against the config schema.
+
+  Returns `{:ok, typed_map}` on success or `{:error, err}` on failure.
+  """
   def parse(config) do
     @schema
     |> Zoi.refine(&termination?/1)

@@ -1,6 +1,8 @@
 defmodule PetriTest do
   use ExUnit.Case, async: true
 
+  doctest Petri
+
   alias Petri.Chromosome.Permutation
   alias Petri.Result
 

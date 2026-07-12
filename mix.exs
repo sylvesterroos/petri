@@ -8,6 +8,13 @@ defmodule Petri.MixProject do
       elixir: "~> 1.20",
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
+      description:
+        "A multi-representation genetic algorithm library. " <>
+          "Supports real, permutation, and binary chromosomes " <>
+          "with representation-specific crossover and mutation operators.",
+      source_url: "https://github.com/sylvesterroos/petri",
+      homepage_url: "https://github.com/sylvesterroos/petri",
+      package: package(),
       deps: deps()
     ]
   end
@@ -15,17 +22,25 @@ defmodule Petri.MixProject do
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
 
-  # Run "mix help compile.app" to learn about applications.
   def application do
     [
       extra_applications: [:logger]
     ]
   end
 
-  # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:zoi, "~> 0.18"}
+      {:zoi, "~> 0.18"},
+      {:ex_doc, "~> 0.35", only: :dev, runtime: false}
+    ]
+  end
+
+  defp package do
+    [
+      licenses: ["LGPL-3.0-or-later"],
+      links: %{
+        "GitHub" => "https://github.com/sylvesterroos/petri"
+      }
     ]
   end
 end
