@@ -14,7 +14,8 @@ defmodule Petri.Chromosome.Permutation do
     def genes(%Permutation{genes: genes}), do: genes
 
     def valid?(%Permutation{genes: genes}) do
-      Enum.all?(genes, &is_integer/1) and
+      genes != [] and
+        Enum.all?(genes, &is_integer/1) and
         Kernel.length(genes) == Kernel.length(Enum.uniq(genes))
     end
   end

@@ -16,7 +16,8 @@ defmodule Petri.Chromosome.Real do
     def genes(%Real{genes: genes}), do: genes
 
     def valid?(%Real{genes: genes, bounds: bounds}) do
-      Enum.count(genes) == Enum.count(bounds) and
+      genes != [] and
+        Enum.count(genes) == Enum.count(bounds) and
         Enum.all?(genes, &is_number/1) and
         (bounds == [] or
            Enum.zip(genes, bounds)

@@ -16,7 +16,7 @@ defmodule Petri.Chromosome.Binary do
     def genes(%Binary{genes: genes}), do: genes
 
     def valid?(%Binary{genes: genes}) do
-      Enum.all?(genes, fn g -> g in [0, 1] end)
+      genes != [] and Enum.all?(genes, fn g -> g in [0, 1] end)
     end
   end
 end
