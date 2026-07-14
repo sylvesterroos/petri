@@ -16,20 +16,20 @@ defmodule Petri.Selection.TournamentTest do
   describe "tournament_selection/2" do
     test "returns exactly population_size chromosomes" do
       seed(1)
-      selected = Selection.tournament_selection(@pop, %{population_size: 3})
+      selected = Selection.tournament_selection(@pop, %{population_size: 3, tournament_size: 3})
       assert length(selected) == 3
     end
 
     test "every selected chromosome comes from the input population" do
       seed(1)
-      selected = Selection.tournament_selection(@pop, %{population_size: 20})
+      selected = Selection.tournament_selection(@pop, %{population_size: 20, tournament_size: 3})
       labels = Enum.map(selected, fn {c, _f} -> c end)
       assert Enum.all?(labels, &(&1 in [0, 1, 2, 3, 4]))
     end
 
-    test "defaults to tournament size 3" do
+    test "tournament size 3 favors fitter individuals" do
       seed(1)
-      selected = Selection.tournament_selection(@pop, %{population_size: 100})
+      selected = Selection.tournament_selection(@pop, %{population_size: 100, tournament_size: 3})
       labels = Enum.map(selected, fn {c, _f} -> c end)
       assert Enum.count(labels, &(&1 == 1)) > Enum.count(labels, &(&1 == 4))
     end
@@ -44,14 +44,16 @@ defmodule Petri.Selection.TournamentTest do
 
     test "is deterministic for a fixed seed" do
       seed(42)
-      s1 = Selection.tournament_selection(@pop, %{population_size: 5})
+      s1 = Selection.tournament_selection(@pop, %{population_size: 5, tournament_size: 3})
       seed(42)
-      s2 = Selection.tournament_selection(@pop, %{population_size: 5})
+      s2 = Selection.tournament_selection(@pop, %{population_size: 5, tournament_size: 3})
       assert s1 == s2
     end
 
     test "selects the only chromosome when population has one member" do
-      selected = Selection.tournament_selection([{42, 1.0}], %{population_size: 5})
+      selected =
+        Selection.tournament_selection([{42, 1.0}], %{population_size: 5, tournament_size: 3})
+
       assert selected == [{42, 1.0}, {42, 1.0}, {42, 1.0}, {42, 1.0}, {42, 1.0}]
     end
   end

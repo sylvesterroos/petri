@@ -14,6 +14,15 @@ defmodule Petri.RecorderTest do
       assert snapshot.min_fitness == 10.0
     end
 
+    test "captures the best chromosome" do
+      population = build_population(fitnesses: [10.0, 30.0, 20.0])
+
+      snapshot = Recorder.record(population)
+
+      # Best chromosome is the one with fitness 30.0 (index 1)
+      assert snapshot.best_chromosome == %{genes: [], index: 1}
+    end
+
     test "computes standard deviation of fitness as diversity" do
       population = build_population(fitnesses: [10.0, 20.0, 30.0])
 
@@ -42,8 +51,10 @@ defmodule Petri.RecorderTest do
   end
 
   defp build_population(fitnesses: fitnesses) do
-    Enum.map(fitnesses, fn fitness ->
-      chromosome = %{genes: []}
+    fitnesses
+    |> Enum.with_index()
+    |> Enum.map(fn {fitness, index} ->
+      chromosome = %{genes: [], index: index}
       {chromosome, fitness}
     end)
   end

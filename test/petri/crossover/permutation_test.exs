@@ -125,4 +125,33 @@ defmodule Petri.Crossover.PermutationTest do
       end
     end
   end
+
+  describe "cx/3 — offspring validity" do
+    @cx_validity_seeds Enum.to_list(1..200)
+
+    test "returns a two-element tuple of offspring for every seed" do
+      for seed <- @cx_validity_seeds do
+        seed(seed)
+        assert match?({%Permutation{}, %Permutation{}}, Crossover.cx(@p0, @p1, %{}))
+      end
+    end
+
+    test "both offspring are valid permutations" do
+      for seed <- @cx_validity_seeds do
+        seed(seed)
+        {o0, o1} = Crossover.cx(@p0, @p1, %{})
+
+        assert Petri.Chromosome.valid?(o0), "seed=#{seed}: o0 is not valid"
+        assert Petri.Chromosome.valid?(o1), "seed=#{seed}: o1 is not valid"
+      end
+    end
+
+    test "returns parents unchanged for length-1 chromosomes" do
+      p0 = %Permutation{genes: [0]}
+      p1 = %Permutation{genes: [0]}
+      {o0, o1} = Crossover.cx(p0, p1, %{})
+      assert o0.genes == [0]
+      assert o1.genes == [0]
+    end
+  end
 end
