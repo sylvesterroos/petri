@@ -7,15 +7,17 @@ defmodule Petri.Recorder do
   deviation of fitness as a simple diversity measure.
   """
 
-  defstruct [:max_fitness, :mean_fitness, :min_fitness, :diversity]
+  defstruct [:best_chromosome, :max_fitness, :mean_fitness, :min_fitness, :diversity]
 
   @doc """
   Build a snapshot from a population of `{chromosome, fitness}` tuples.
   """
   def record(population) when is_list(population) do
     fitnesses = Enum.map(population, fn {_chromosome, fitness} -> fitness end)
+    {best_chromosome, _} = Enum.max_by(population, fn {_, fitness} -> fitness end)
 
     %__MODULE__{
+      best_chromosome: best_chromosome,
       max_fitness: Enum.max(fitnesses),
       mean_fitness: Enum.sum(fitnesses) / length(fitnesses),
       min_fitness: Enum.min(fitnesses),
