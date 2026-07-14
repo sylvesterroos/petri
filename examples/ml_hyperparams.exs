@@ -24,27 +24,25 @@ defmodule MLHyperparams do
   Runs the hyperparameter tuning GA and prints results.
   """
   def run do
-    :rand.seed(:exsss, 99)
+    # Synthetic dataset: 10 features but only the first 3 carry signal.
+    # The true relationship is y = 2x₁ + 3x₂ − 1.5x₃ + ε, where ε ~ N(0, 0.01).
+    # ε is Gaussian noise (mean 0, std dev 0.1) that models measurement error and
+    # unobserved factors. Without it the relationship would be deterministic and any
+    # model could fit perfectly; the noise makes it realistic and tests whether the
+    # GA can find hyperparameters that recover the signal through the scatter.
+    # Features 4–10 are noise, but the GA doesn't know that. It has to learn
+    # which hyperparameters let the model fit the signal and ignore the rest.
+    key = Nx.Random.key(99)
+    keys = Nx.Random.split(key, parts: 4)
 
-    train_x_raw = for _ <- 1..@n_train, do: for(_ <- 1..@n_features, do: :rand.uniform())
-    test_x_raw = for _ <- 1..@n_test, do: for(_ <- 1..@n_features, do: :rand.uniform())
+    {train_x, _key} = Nx.Random.uniform(Nx.take(keys, 0), shape: {@n_train, @n_features})
+    {test_x, _key} = Nx.Random.uniform(Nx.take(keys, 1), shape: {@n_test, @n_features})
 
-    train_x = Nx.tensor(train_x_raw)
-    test_x = Nx.tensor(test_x_raw)
+    {noise_train, _key} = Nx.Random.normal(Nx.take(keys, 2), 0.0, 0.01, shape: {@n_train})
+    {noise_test, _key} = Nx.Random.normal(Nx.take(keys, 3), 0.0, 0.01, shape: {@n_test})
 
-    train_y =
-      train_x_raw
-      |> Enum.map(fn row ->
-        dot_elixir(row, Nx.to_list(@true_weights)) + :rand.normal(0.0, 0.01)
-      end)
-      |> Nx.tensor()
-
-    test_y =
-      test_x_raw
-      |> Enum.map(fn row ->
-        dot_elixir(row, Nx.to_list(@true_weights)) + :rand.normal(0.0, 0.01)
-      end)
-      |> Nx.tensor()
+    train_y = Nx.add(Nx.dot(train_x, @true_weights), noise_train)
+    test_y = Nx.add(Nx.dot(test_x, @true_weights), noise_test)
 
     oracle_r2 = r2(test_y, Nx.dot(test_x, @true_weights))
 
@@ -106,6 +104,9 @@ defmodule MLHyperparams do
     """)
   end
 
+  # Vanilla gradient descent. The dataset is small enough to use the full
+  # batch each step. L2 regularization (lambda) shrinks weights toward zero,
+  # which helps when the model has more features than signal.
   defp train(x, y, lr, lambda, epochs) do
     n_features = Nx.axis_size(x, 1)
     n = Nx.axis_size(x, 0)
@@ -119,15 +120,14 @@ defmodule MLHyperparams do
     end)
   end
 
+  # R² = 1 − (residual sum of squares / total sum of squares).
+  # 1.0 means perfect prediction, 0.0 means the model is no better than
+  # predicting the mean. Can go negative if the model is worse than that.
   defp r2(y_true, y_pred) do
     y_mean = Nx.mean(y_true)
     ss_res = Nx.sum(Nx.pow(Nx.subtract(y_true, y_pred), 2))
     ss_tot = Nx.sum(Nx.pow(Nx.subtract(y_true, y_mean), 2))
     if Nx.to_number(ss_tot) == 0.0, do: 1.0, else: 1.0 - Nx.to_number(Nx.divide(ss_res, ss_tot))
-  end
-
-  defp dot_elixir(a, b) do
-    Enum.zip(a, b) |> Enum.reduce(0.0, fn {ai, bi}, acc -> acc + ai * bi end)
   end
 
   defp weight_table(learned, target) do

@@ -1,4 +1,4 @@
-Mix.install([{:petri, path: "."}, :nx])
+Mix.install([{:petri, path: "."}])
 
 defmodule TSP do
   @moduledoc """
