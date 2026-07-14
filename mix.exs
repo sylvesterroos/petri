@@ -15,7 +15,8 @@ defmodule Petri.MixProject do
       source_url: "https://github.com/sylvesterroos/petri",
       homepage_url: "https://github.com/sylvesterroos/petri",
       package: package(),
-      deps: deps()
+      deps: deps(),
+      aliases: aliases()
     ]
   end
 
@@ -31,7 +32,16 @@ defmodule Petri.MixProject do
   defp deps do
     [
       {:zoi, "~> 0.18"},
-      {:ex_doc, "~> 0.35", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.35", only: :dev, runtime: false},
+      {:tidewave, "~> 0.6", only: [:dev]},
+      {:bandit, "~> 1.0", only: :dev}
+    ]
+  end
+
+  defp aliases do
+    [
+      tidewave:
+        "run --no-halt -e 'Agent.start(fn -> Bandit.start_link(plug: Tidewave, port: 4000) end)'"
     ]
   end
 

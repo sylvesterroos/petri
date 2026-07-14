@@ -18,9 +18,10 @@ in
   dotenv.enable = false;
   dotenv.disableHint = true;
 
-  env = {
+  env = rec {
     # Prevents conflicts with elixir versions installed otherwise
     MIX_HOME = "${config.git.root}/.mix";
+    MIX_ARCHIVES = "${MIX_HOME}/archives";
     HEX_HOME = "${config.git.root}/.hex";
 
     # Erlang shell history and distributed cookie
@@ -69,6 +70,11 @@ in
       package = elixir;
       lsp.enable = false;
     };
+  };
+
+  processes.tidewave = {
+    cwd = config.git.root;
+    exec = /* bash */ "mix tidewave";
   };
 
   # See full reference at https://devenv.sh/reference/options/
