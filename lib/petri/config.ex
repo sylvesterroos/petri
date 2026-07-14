@@ -37,7 +37,7 @@ defmodule Petri.Config do
     stagnation_generations: Z.integer() |> Z.gte(1) |> Z.optional(),
     time_budget_ms: Z.integer() |> Z.gte(1) |> Z.optional(),
     selection: Z.enum([:tournament, :roulette, :rank, :sus]) |> Z.default(:sus),
-    tournament_size: Z.integer() |> Z.gte(1) |> Z.optional(),
+    tournament_size: Z.integer() |> Z.gte(1) |> Z.default(3),
     seed: Z.integer() |> Z.optional(),
     elite_count: Z.integer() |> Z.gte(0) |> Z.default(2),
     crossover_rate: Z.float() |> Z.gte(0.0) |> Z.lte(1.0) |> Z.default(0.9),
@@ -56,14 +56,14 @@ defmodule Petri.Config do
   @real Z.map(
           Map.merge(@base, %{
             encoding: Z.literal(:real),
-            bounds: Z.any(),
+            bounds: Z.list(Z.tuple({Z.float(), Z.float()})),
             initialization: Z.enum([:random, :lhs]) |> Z.default(:random),
             crossover: Z.enum([:blx_alpha, :sbx]) |> Z.default(:blx_alpha),
             mutation: Z.enum([:gaussian, :uniform]) |> Z.default(:gaussian),
             blx_alpha_param: Z.float() |> Z.gte(0.0) |> Z.default(0.5),
             sbx_eta: Z.float() |> Z.gte(1.0) |> Z.default(2.0),
             gaussian_sigma: Z.float() |> Z.gte(0.0) |> Z.default(0.1),
-            mutation_per_gene_rate: Z.float() |> Z.gte(0.0) |> Z.lte(1.0) |> Z.optional()
+            mutation_per_gene_rate: Z.float() |> Z.gte(0.0) |> Z.lte(1.0) |> Z.default(1.0)
           })
         )
 
@@ -73,7 +73,8 @@ defmodule Petri.Config do
               length: Z.integer() |> Z.gte(1),
               crossover:
                 Z.enum([:single_point, :two_point, :uniform]) |> Z.default(:single_point),
-              mutation: Z.enum([:bit_flip]) |> Z.default(:bit_flip)
+              mutation: Z.enum([:bit_flip]) |> Z.default(:bit_flip),
+              mutation_per_gene_rate: Z.float() |> Z.gte(0.0) |> Z.lte(1.0) |> Z.optional()
             })
           )
 

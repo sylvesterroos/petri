@@ -8,8 +8,8 @@ defmodule Petri.Mutation.Real do
   the gene's bound range. Output is clamped to bounds.
   """
   def gaussian(%Real{genes: genes, bounds: bounds} = chromosome, config) do
-    sigma = Map.get(config, :gaussian_sigma, 0.1)
-    per_gene_rate = Map.get(config, :mutation_per_gene_rate, 1.0)
+    sigma = config.gaussian_sigma
+    per_gene_rate = config.mutation_per_gene_rate
 
     new_genes =
       Enum.zip(genes, bounds)
@@ -30,7 +30,7 @@ defmodule Petri.Mutation.Real do
   with probability `mutation_per_gene_rate` (default 1 / length).
   """
   def uniform(%Real{genes: genes, bounds: bounds} = chromosome, config) do
-    per_gene_rate = Map.get(config, :mutation_per_gene_rate, 1.0 / max(length(genes), 1))
+    per_gene_rate = config.mutation_per_gene_rate
 
     new_genes =
       Enum.zip(genes, bounds)

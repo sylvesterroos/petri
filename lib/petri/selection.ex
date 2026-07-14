@@ -48,7 +48,7 @@ defmodule Petri.Selection do
       when is_list(population) and is_map(config) do
     if length(population) == 0, do: raise(ArgumentError, "empty population")
     n = Map.fetch!(config, :population_size)
-    tournament_size = Map.get(config, :tournament_size, 3)
+    tournament_size = config.tournament_size
 
     Enum.map(1..n, fn _ ->
       contestants = Enum.take_random(population, tournament_size)
