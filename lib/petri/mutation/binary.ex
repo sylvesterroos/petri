@@ -1,4 +1,5 @@
 defmodule Petri.Mutation.Binary do
+  @moduledoc "Mutation operators for binary chromosomes."
   alias Petri.Chromosome.Binary
 
   @doc """

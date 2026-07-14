@@ -1,4 +1,5 @@
 defmodule Petri.Mutation.Real do
+  @moduledoc "Mutation operators for real-valued chromosomes."
   alias Petri.Chromosome.Real
 
   @doc """

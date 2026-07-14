@@ -1,4 +1,5 @@
 defmodule Petri.State do
+  @moduledoc "Internal engine state tracked across generations."
   defstruct generation: 1,
             best_fitness: 0.0,
             last_improvement_generation: 1,

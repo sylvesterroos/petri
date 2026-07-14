@@ -14,6 +14,7 @@ defmodule Petri.Result do
 
   defstruct [:best, :history, :generations_run, :evaluations]
 
+  @doc "Builds a Result from the best individual, generation history, and final engine state."
   def new(best, history, %State{} = state) do
     %__MODULE__{
       best: best,

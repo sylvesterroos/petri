@@ -1,6 +1,8 @@
 defmodule Petri.Mutation.Permutation do
+  @moduledoc "Mutation operators for permutation chromosomes."
   alias Petri.Chromosome.Permutation
 
+  @doc "Reverses a random segment of the permutation."
   def inversion(%Permutation{genes: genes} = chromosome, _config) do
     if length(genes) <= 1 do
       chromosome
@@ -18,6 +20,7 @@ defmodule Petri.Mutation.Permutation do
     end
   end
 
+  @doc "Swaps two random positions."
   def swap(%Permutation{genes: genes} = chromosome, _config) do
     if length(genes) <= 1 do
       chromosome
@@ -34,6 +37,7 @@ defmodule Petri.Mutation.Permutation do
     end
   end
 
+  @doc "Moves a random element to a new position."
   def insert(%Permutation{genes: genes} = chromosome, _config) do
     n = length(genes)
 

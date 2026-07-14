@@ -1,4 +1,5 @@
 defprotocol Petri.Chromosome do
+  @moduledoc "Protocol for chromosome representations. Implementations provide `length/1`, `genes/1`, and `valid?/1`."
   @doc "Returns the number of genes in the chromosome."
   def length(chromosome)
 

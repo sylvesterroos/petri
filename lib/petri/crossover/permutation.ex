@@ -1,18 +1,22 @@
 defmodule Petri.Crossover.Permutation do
+  @moduledoc "Crossover operators for permutation chromosomes."
   alias Petri.Chromosome.Permutation
 
+  @doc "Order crossover (OX)."
   def ox(%Permutation{genes: p0}, %Permutation{genes: p1}, config)
       when is_list(p0) and is_list(p1) do
     {c0_genes, c1_genes} = ox_genes(p0, p1, config)
     {%Permutation{genes: c0_genes}, %Permutation{genes: c1_genes}}
   end
 
+  @doc "Partially mapped crossover (PMX)."
   def pmx(%Permutation{genes: p0}, %Permutation{genes: p1}, config)
       when is_list(p0) and is_list(p1) do
     {c0_genes, c1_genes} = pmx_genes(p0, p1, config)
     {%Permutation{genes: c0_genes}, %Permutation{genes: c1_genes}}
   end
 
+  @doc "Cycle crossover (CX)."
   def cx(%Permutation{genes: p0}, %Permutation{genes: p1}, _config)
       when is_list(p0) and is_list(p1) do
     {c0_genes, c1_genes} = cx_genes(p0, p1)

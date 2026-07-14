@@ -1,4 +1,5 @@
 defmodule Petri.Engine do
+  @moduledoc "The generational genetic algorithm engine."
   alias Petri.Initialization
   alias Petri.State
   alias Petri.RNG

@@ -1,4 +1,5 @@
 defmodule Petri.Crossover.Binary do
+  @moduledoc "Crossover operators for binary chromosomes."
   alias Petri.Chromosome.Binary
 
   @doc """

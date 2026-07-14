@@ -1,4 +1,5 @@
 defmodule Petri.Crossover.Real do
+  @moduledoc "Crossover operators for real-valued chromosomes."
   alias Petri.Chromosome.Real
 
   @doc """
