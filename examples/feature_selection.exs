@@ -13,6 +13,9 @@ defmodule FeatureSelection do
   Each bit in the chromosome represents whether a feature is included (1)
   or excluded (0). The fitness is 1 / (1 + MSE) where MSE is the mean
   squared error when predicting the target from only the selected features.
+  Because the targets contain irreducible Gaussian noise (variance 0.1),
+  a perfect feature set still cannot achieve fitness 1.0 — the noise
+  alone yields an MSE of ~0.1, capping fitness at ~0.909.
   """
 
   alias Petri.Chromosome.Binary
@@ -45,6 +48,12 @@ defmodule FeatureSelection do
     # Fitness: how well the selected features predict the target.
     # We use a simple sum of selected feature values as the predictor
     # (equivalent to a linear model with fixed unit weights).
+    #
+    # NOTE: :rand.normal/2 takes (mean, variance), NOT (mean, std_dev).
+    # So the noise variance here is 0.1 (std ≈ 0.316). Because the
+    # fitness is 1 / (1 + MSE), the irreducible noise sets an upper
+    # bound of ~1 / (1 + 0.1) ≈ 0.909 — a perfect feature set that
+    # exactly reconstructs the signal still cannot reach 1.0.
     fitness = fn %Binary{genes: mask} ->
       predictions =
         Enum.map(data, fn row ->
