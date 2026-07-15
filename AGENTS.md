@@ -16,6 +16,7 @@ devenv shell -- mix docs                              # generate docs to doc/
 devenv shell -- elixir examples/tsp.exs               # run examples (NOT mix run)
 devenv shell -- elixir examples/ml_hyperparams.exs
 devenv shell -- elixir examples/feature_selection.exs
+devenv shell -- elixir examples/ring_inscription.exs
 ```
 
 Examples are standalone `.exs` scripts that use `Mix.install([{:petri, path: "."}])`. They run directly with `elixir` from the repo root, no compilation needed.

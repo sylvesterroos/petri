@@ -2,14 +2,14 @@
 
 A multi-representation genetic algorithm library for Elixir.
 
-Supports three chromosome encodings:
-real (continuous), permutation (ordering), and binary. Each has its own
+Supports multiple chromosome encodings:
+real (continuous), permutation (ordering), binary, integer. Each has its own
 crossover and mutation operators. Selection, termination, and the
-generational engine are shared across all three.
+generational engine are shared.
 
 ## Usage
 
-Three snippets from `examples/`.
+Some snippets from `examples/`.
 
 ### Permutation: TSP on Berlin52
 
@@ -115,6 +115,47 @@ result =
 
 From [`examples/feature_selection.exs`](examples/feature_selection.exs).
 
+### Integer: ring inscription
+
+```elixir
+alias Petri.Chromosome.Integer, as: Chromosome
+
+fitness = fn %Chromosome{genes: string} ->
+  character_score =
+    string
+    |> Enum.zip(target_chars)
+    |> Enum.count(fn {a, b} -> a == b end)
+
+  bigram_score =
+    string
+    |> bigrams()
+    |> Enum.zip(target_bigrams)
+    |> Enum.count(fn {a, b} -> a == b end)
+
+  character_score + 2 * bigram_score
+end
+
+result =
+  Petri.run(fitness, %{
+    encoding: :integer,
+    bounds: List.duplicate({0, 255}, n),
+    population_size: 200,
+    max_generations: 10_000,
+    seed: 9,
+    selection: :tournament,
+    tournament_size: 5,
+    elite_count: 1,
+    crossover: :two_point,
+    crossover_rate: 0.9,
+    mutation: :uniform,
+    mutation_per_gene_rate: 0.01,
+    mutation_rate: 1.0,
+    fitness_threshold: max_fitness * 1.0
+  })
+```
+
+From [`examples/ring_inscription.exs`](examples/ring_inscription.exs).
+
 ## Running the examples
 
 Standalone `.exs` scripts that use `Mix.install` to pull in dependencies.
@@ -124,6 +165,7 @@ Run from the repo root with `elixir` (not `mix`):
 elixir examples/tsp.exs
 elixir examples/ml_hyperparams.exs
 elixir examples/feature_selection.exs
+elixir examples/ring_inscription.exs
 ```
 
 | Example | Encoding | What it does |
@@ -131,3 +173,4 @@ elixir examples/feature_selection.exs
 | `tsp.exs` | permutation | Order crossover + swap mutation on Berlin52 |
 | `ml_hyperparams.exs` | real | BLX-α + Gaussian mutation tuning a linear regression |
 | `feature_selection.exs` | binary | Uniform crossover + bit-flip for feature subset selection |
+| `ring_inscription.exs` | integer | Two-point crossover + uniform mutation, evolve a string via bigram fitness |
