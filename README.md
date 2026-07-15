@@ -131,13 +131,3 @@ elixir examples/feature_selection.exs
 | `tsp.exs` | permutation | Order crossover + swap mutation on Berlin52 |
 | `ml_hyperparams.exs` | real | BLX-α + Gaussian mutation tuning a linear regression |
 | `feature_selection.exs` | binary | Uniform crossover + bit-flip for feature subset selection |
-
-## Installation
-
-```elixir
-def deps do
-  [
-    {:petri, "~> 0.1.0"}
-  ]
-end
-```
