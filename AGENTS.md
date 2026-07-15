@@ -23,9 +23,10 @@ Examples are standalone `.exs` scripts that use `Mix.install([{:petri, path: "."
 
 ## Architecture
 
-Three chromosome encodings, each a struct implementing the `Petri.Chromosome` protocol:
+Four chromosome encodings, each a struct implementing the `Petri.Chromosome` protocol:
 
 - `Petri.Chromosome.Real` — continuous floats, per-gene `{lo, hi}` bounds
+- `Petri.Chromosome.Integer` — discrete integers, per-gene `{lo, hi}` bounds
 - `Petri.Chromosome.Permutation` — integer permutations, no duplicates
 - `Petri.Chromosome.Binary` — bit strings (0/1)
 
@@ -53,5 +54,5 @@ The test helper module at `test/support/test_helpers.ex` is compiled in test env
 ## Gotchas
 
 - At least one termination condition is required: `max_generations`, `fitness_threshold`, `stagnation_generations`, or `time_budget_ms`. Config validation rejects a map with none of these.
-- Operator fields are encoding-scoped. `crossover: :blx_alpha` is only valid with `encoding: :real`. Passing it with `:binary` or `:permutation` fails validation.
+- Operator fields are encoding-scoped. `crossover: :blx_alpha` is only valid with `encoding: :real` or `:integer`. Passing it with `:binary` or `:permutation` fails validation.
 - Examples are Elixir scripts, not Mix tasks. Use `elixir`, not `mix run`.

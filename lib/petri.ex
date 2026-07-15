@@ -2,11 +2,12 @@ defmodule Petri do
   @moduledoc """
   A multi-representation genetic algorithm library.
 
-  Petri supports three chromosome encodings:
+  Petri supports four chromosome encodings:
 
     * `Petri.Chromosome.Real` — continuous values with per-gene bounds
     * `Petri.Chromosome.Permutation` — integer permutations (e.g. TSP tours)
     * `Petri.Chromosome.Binary` — bit strings for subset selection
+    * `Petri.Chromosome.Integer` — discrete integers with per-gene bounds
 
   Each encoding has its own crossover and mutation operators. Selection,
   termination, and the generational engine work across all encodings.
@@ -25,12 +26,13 @@ defmodule Petri do
 
   ## Running the examples
 
-  Three standalone `.exs` scripts in the `examples/` directory demonstrate
+  Four standalone `.exs` scripts in the `examples/` directory demonstrate
   each encoding on a realistic problem:
 
       elixir examples/tsp.exs               # Berlin52 TSP (permutation)
       elixir examples/ml_hyperparams.exs    # Hyperparameter tuning (real)
       elixir examples/feature_selection.exs # Feature subset selection (binary)
+      elixir examples/ring_inscription.exs  # String evolution (integer)
   """
 
   alias Petri.Config
@@ -82,6 +84,18 @@ defmodule Petri do
       ...> })
       iex> {_chrom, p_fit} = result.best
       iex> p_fit > 10
+      true
+
+  ## Config (integer encoding)
+
+      iex> fitness = fn c -> Petri.Chromosome.genes(c) |> Enum.sum() end
+      iex> result = Petri.run(fitness, %{
+      ...>   encoding: :integer, bounds: [{0, 10}, {0, 10}],
+      ...>   selection: :tournament,
+      ...>   population_size: 50, max_generations: 50, seed: 1
+      ...> })
+      iex> {_chrom, i_fit} = result.best
+      iex> i_fit > 10
       true
   """
   def run(fitness_fn, config) do

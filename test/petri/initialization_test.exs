@@ -5,7 +5,12 @@ defmodule Petri.InitializationTest do
 
   describe "init_random/2 for integer" do
     test "creates a valid integer chromosome" do
-      c = Petri.Initialization.init_random(%{encoding: :integer, bounds: [{0, 10}, {5, 15}, {-3, 3}]})
+      c =
+        Petri.Initialization.init_random(%{
+          encoding: :integer,
+          bounds: [{0, 10}, {5, 15}, {-3, 3}]
+        })
+
       assert Petri.Chromosome.valid?(c)
       assert Petri.Chromosome.length(c) == 3
     end

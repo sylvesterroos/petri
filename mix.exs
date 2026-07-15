@@ -9,9 +9,7 @@ defmodule Petri.MixProject do
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
       description:
-        "A multi-representation genetic algorithm library. " <>
-          "Supports real, permutation, and binary chromosomes " <>
-          "with representation-specific crossover and mutation operators.",
+        "A multi-representation genetic algorithm library with representation-specific crossover and mutation operators.",
       source_url: "https://github.com/sylvesterroos/petri",
       homepage_url: "https://github.com/sylvesterroos/petri",
       package: package(),
