@@ -85,7 +85,7 @@ defmodule Petri.Config do
                encoding: Z.literal(:integer),
                blx_alpha_param: Z.float() |> Z.gte(0.0) |> Z.default(0.5),
                bounds: Z.list(Z.tuple({Z.integer(), Z.integer()})),
-               crossover: Z.enum([:blx_alpha, :sbx]) |> Z.default(:blx_alpha),
+               crossover: Z.enum([:blx_alpha, :two_point, :sbx]) |> Z.default(:blx_alpha),
                gaussian_sigma: Z.float() |> Z.gte(0.0) |> Z.default(0.1),
                initialization: Z.enum([:random]) |> Z.default(:random),
                mutation: Z.enum([:gaussian, :uniform]) |> Z.default(:gaussian),
