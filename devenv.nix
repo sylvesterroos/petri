@@ -28,6 +28,11 @@ in
     ERL_AFLAGS = "-kernel shell_history enabled -setcookie petri";
   };
 
+  enterShell = /* bash */ ''
+    mix local.hex --if-missing --force
+    mix local.rebar --if-missing --force
+  '';
+
   scripts.remsh.exec = ''
     ${elixir}/bin/iex --sname petri-iex --remsh petri@"$(hostname -s)" "$@"
   '';
