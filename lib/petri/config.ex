@@ -47,38 +47,54 @@ defmodule Petri.Config do
   @permutation Z.map(
                  Map.merge(@base, %{
                    encoding: Z.literal(:permutation),
-                   n: Z.integer() |> Z.gte(1),
                    crossover: Z.enum([:ox, :pmx, :cx]) |> Z.default(:pmx),
-                   mutation: Z.enum([:swap, :insert, :inversion]) |> Z.default(:swap)
+                   initialization: Z.enum([:random]) |> Z.default(:random),
+                   mutation: Z.enum([:swap, :insert, :inversion]) |> Z.default(:swap),
+                   n: Z.integer() |> Z.gte(1)
                  })
                )
 
   @real Z.map(
           Map.merge(@base, %{
             encoding: Z.literal(:real),
-            bounds: Z.list(Z.tuple({Z.float(), Z.float()})),
-            initialization: Z.enum([:random, :lhs]) |> Z.default(:random),
-            crossover: Z.enum([:blx_alpha, :sbx]) |> Z.default(:blx_alpha),
-            mutation: Z.enum([:gaussian, :uniform]) |> Z.default(:gaussian),
             blx_alpha_param: Z.float() |> Z.gte(0.0) |> Z.default(0.5),
-            sbx_eta: Z.float() |> Z.gte(1.0) |> Z.default(2.0),
+            bounds: Z.list(Z.tuple({Z.float(), Z.float()})),
+            crossover: Z.enum([:blx_alpha, :sbx]) |> Z.default(:blx_alpha),
             gaussian_sigma: Z.float() |> Z.gte(0.0) |> Z.default(0.1),
-            mutation_per_gene_rate: Z.float() |> Z.gte(0.0) |> Z.lte(1.0) |> Z.default(1.0)
+            initialization: Z.enum([:random, :lhs]) |> Z.default(:random),
+            mutation: Z.enum([:gaussian, :uniform]) |> Z.default(:gaussian),
+            mutation_per_gene_rate: Z.float() |> Z.gte(0.0) |> Z.lte(1.0) |> Z.default(1.0),
+            sbx_eta: Z.float() |> Z.gte(1.0) |> Z.default(2.0)
           })
         )
 
   @binary Z.map(
             Map.merge(@base, %{
               encoding: Z.literal(:binary),
-              length: Z.integer() |> Z.gte(1),
               crossover:
                 Z.enum([:single_point, :two_point, :uniform]) |> Z.default(:single_point),
+              initialization: Z.enum([:random]) |> Z.default(:random),
+              length: Z.integer() |> Z.gte(1),
               mutation: Z.enum([:bit_flip]) |> Z.default(:bit_flip),
               mutation_per_gene_rate: Z.float() |> Z.gte(0.0) |> Z.lte(1.0) |> Z.optional()
             })
           )
 
-  @schema Z.discriminated_union(:encoding, [@permutation, @real, @binary])
+  @integer Z.map(
+             Map.merge(@base, %{
+               encoding: Z.literal(:integer),
+               blx_alpha_param: Z.float() |> Z.gte(0.0) |> Z.default(0.5),
+               bounds: Z.list(Z.tuple({Z.integer(), Z.integer()})),
+               crossover: Z.enum([:blx_alpha, :sbx]) |> Z.default(:blx_alpha),
+               gaussian_sigma: Z.float() |> Z.gte(0.0) |> Z.default(0.1),
+               initialization: Z.enum([:random]) |> Z.default(:random),
+               mutation: Z.enum([:gaussian, :uniform]) |> Z.default(:gaussian),
+               mutation_per_gene_rate: Z.float() |> Z.gte(0.0) |> Z.lte(1.0) |> Z.default(1.0),
+               sbx_eta: Z.float() |> Z.gte(1.0) |> Z.default(2.0)
+             })
+           )
+
+  @schema Z.discriminated_union(:encoding, [@permutation, @real, @binary, @integer])
 
   @doc """
   Parses and validates a map against the config schema.
