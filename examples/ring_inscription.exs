@@ -101,7 +101,7 @@ defmodule RingInscription do
         |> List.to_string()
 
       IO.write("\r#{string}")
-      Process.sleep(1)
+      Process.sleep(5)
     end)
 
     IO.puts("")

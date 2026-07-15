@@ -25,7 +25,7 @@ defmodule MLHyperparams do
   """
   def run do
     # Synthetic dataset: 10 features but only the first 3 carry signal.
-    # The true relationship is y = 2x₁ + 3x₂ − 1.5x₃ + ε, where ε ~ N(0, 0.01).
+    # The true relationship is y = 2x₁ + 3x₂ − 1.5x₃ + ε, where ε ~ N(0, σ²=0.01).
     # ε is Gaussian noise (mean 0, std dev 0.1) that models measurement error and
     # unobserved factors. Without it the relationship would be deterministic and any
     # model could fit perfectly; the noise makes it realistic and tests whether the
@@ -38,8 +38,8 @@ defmodule MLHyperparams do
     {train_x, _key} = Nx.Random.uniform(Nx.take(keys, 0), shape: {@n_train, @n_features})
     {test_x, _key} = Nx.Random.uniform(Nx.take(keys, 1), shape: {@n_test, @n_features})
 
-    {noise_train, _key} = Nx.Random.normal(Nx.take(keys, 2), 0.0, 0.01, shape: {@n_train})
-    {noise_test, _key} = Nx.Random.normal(Nx.take(keys, 3), 0.0, 0.01, shape: {@n_test})
+    {noise_train, _key} = Nx.Random.normal(Nx.take(keys, 2), 0.0, 0.1, shape: {@n_train})
+    {noise_test, _key} = Nx.Random.normal(Nx.take(keys, 3), 0.0, 0.1, shape: {@n_test})
 
     train_y = Nx.add(Nx.dot(train_x, @true_weights), noise_train)
     test_y = Nx.add(Nx.dot(test_x, @true_weights), noise_test)

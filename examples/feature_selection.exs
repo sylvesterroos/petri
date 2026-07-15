@@ -49,8 +49,8 @@ defmodule FeatureSelection do
     # We use a simple sum of selected feature values as the predictor
     # (equivalent to a linear model with fixed unit weights).
     #
-    # NOTE: :rand.normal/2 takes (mean, variance), NOT (mean, std_dev).
-    # So the noise variance here is 0.1 (std ≈ 0.316). Because the
+    # :rand.normal/2 takes (mean, variance), so the noise variance here
+    # is 0.1 (std ≈ 0.316). Because the
     # fitness is 1 / (1 + MSE), the irreducible noise sets an upper
     # bound of ~1 / (1 + 0.1) ≈ 0.909 — a perfect feature set that
     # exactly reconstructs the signal still cannot reach 1.0.
