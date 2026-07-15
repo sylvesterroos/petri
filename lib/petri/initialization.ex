@@ -4,9 +4,8 @@ defmodule Petri.Initialization do
 
   ## Dispatch
 
-  `init_random/2` takes a representation tag (`:permutation`, `:real`,
-  `:binary`) and a map config, returning a **single** chromosome. Build
-  a population by calling it repeatedly.
+  `init_random/1` takes a config map with an `:encoding` key and returns
+  a **single** chromosome. Build a population by calling it repeatedly.
 
   ## Reproducibility
 
@@ -18,9 +17,10 @@ defmodule Petri.Initialization do
   alias Petri.Chromosome.Permutation
   alias Petri.Chromosome.Real
   alias Petri.Chromosome.Binary
+  alias Petri.Chromosome.Integer
 
   @doc """
-  Initialize a single random chromosome of the given representation.
+  Initialize a single random chromosome for the encoding specified in config.
 
   ## Options by representation
 
@@ -33,25 +33,25 @@ defmodule Petri.Initialization do
   ### `:binary`
     - `:length` (required) — number of bits
 
+  ### `:integer`
+    - `:bounds` (required) — list of `{lo, hi}` integer tuples, one per gene
+
   ### Common
     - `:seed` — integer seed for `:rand` (optional)
 
   ## Examples
 
-      iex> c = Petri.Initialization.init_random(:permutation, %{n: 5})
+      iex> c = Petri.Initialization.init_random(%{encoding: :permutation, n: 5})
       iex> Petri.Chromosome.valid?(c) and Petri.Chromosome.length(c) == 5
       true
   """
-  def init_random(tag, config)
+  def init_random(config)
 
-  def init_random(:permutation, config) do
-    n = Map.fetch!(config, :n)
+  def init_random(%{encoding: :permutation, n: n}) do
     %Permutation{genes: Enum.shuffle(0..(n - 1))}
   end
 
-  def init_random(:real, config) do
-    bounds = Map.fetch!(config, :bounds)
-
+  def init_random(%{encoding: :real, bounds: bounds}) do
     genes =
       Enum.map(bounds, fn {lo, hi} ->
         lo + :rand.uniform() * (hi - lo)
@@ -60,10 +60,18 @@ defmodule Petri.Initialization do
     %Real{genes: genes, bounds: bounds}
   end
 
-  def init_random(:binary, config) do
-    len = Map.fetch!(config, :length)
-    genes = for _ <- 1..len, do: Enum.random([0, 1])
+  def init_random(%{encoding: :binary, length: length}) do
+    genes = for _ <- 1..length, do: Enum.random([0, 1])
     %Binary{genes: genes}
+  end
+
+  def init_random(%{encoding: :integer, bounds: bounds}) do
+    genes =
+      Enum.map(bounds, fn {lo, hi} ->
+        lo + :rand.uniform(hi - lo + 1) - 1
+      end)
+
+    %Integer{genes: genes, bounds: bounds}
   end
 
   @doc """
@@ -75,7 +83,7 @@ defmodule Petri.Initialization do
 
   Returns a list of `RealChromosome` structs, not a single chromosome.
   """
-  def init_latin_hypercube(config) do
+  def init_latin_hypercube(%{encoding: :real} = config) do
     bounds = Map.fetch!(config, :bounds)
     pop_size = Map.fetch!(config, :population_size)
 
