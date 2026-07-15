@@ -45,6 +45,20 @@ defmodule Petri.TestHelpers do
     )
   end
 
+  def config(:integer, overrides) do
+    Map.merge(
+      %{
+        blx_alpha_param: 0.5,
+        sbx_eta: 2.0,
+        gaussian_sigma: 0.1,
+        mutation_per_gene_rate: 1.0,
+        crossover_rate: 0.9,
+        mutation_rate: 0.1
+      },
+      overrides
+    )
+  end
+
   def config(:binary, overrides) do
     Map.merge(
       %{

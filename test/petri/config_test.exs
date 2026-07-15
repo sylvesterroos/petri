@@ -6,6 +6,73 @@ defmodule Petri.ConfigTest do
   alias Petri.Config
 
   describe "parse/1" do
+    test "accepts a valid integer config" do
+      assert {:ok, config} =
+               Config.parse(%{
+                 encoding: :integer,
+                 bounds: [{0, 10}, {5, 15}],
+                 population_size: 50,
+                 max_generations: 100
+               })
+
+      assert config.encoding == :integer
+      assert config.bounds == [{0, 10}, {5, 15}]
+      assert config.population_size == 50
+      assert config.crossover == :blx_alpha
+      assert config.mutation == :gaussian
+    end
+
+    test "integer config applies defaults" do
+      assert {:ok, config} =
+               Config.parse(%{
+                 encoding: :integer,
+                 bounds: [{0, 10}],
+                 population_size: 10,
+                 max_generations: 5
+               })
+
+      assert config.selection == :sus
+      assert config.crossover == :blx_alpha
+      assert config.mutation == :gaussian
+      assert config.elite_count == 2
+      assert config.crossover_rate == 0.9
+      assert config.mutation_rate == 0.1
+      assert config.blx_alpha_param == 0.5
+      assert config.sbx_eta == 2.0
+      assert config.gaussian_sigma == 0.1
+    end
+
+    test "integer config requires bounds" do
+      assert {:error, _errors} =
+               Config.parse(%{
+                 encoding: :integer,
+                 population_size: 10,
+                 max_generations: 5
+               })
+    end
+
+    test "integer config rejects permutation crossover" do
+      assert {:error, _errors} =
+               Config.parse(%{
+                 encoding: :integer,
+                 bounds: [{0, 10}],
+                 population_size: 10,
+                 max_generations: 5,
+                 crossover: :ox
+               })
+    end
+
+    test "integer config rejects binary mutation" do
+      assert {:error, _errors} =
+               Config.parse(%{
+                 encoding: :integer,
+                 bounds: [{0, 10}],
+                 population_size: 10,
+                 max_generations: 5,
+                 mutation: :bit_flip
+               })
+    end
+
     test "accepts a valid permutation config" do
       assert {:ok, config} =
                Config.parse(%{
@@ -129,6 +196,21 @@ defmodule Petri.ConfigTest do
       end
     end
 
+    test "permits all valid integer operators" do
+      for crossover <- [:blx_alpha, :two_point, :sbx],
+          mutation <- [:gaussian, :uniform] do
+        assert {:ok, _config} =
+                 Config.parse(%{
+                   encoding: :integer,
+                   bounds: [{0, 10}],
+                   population_size: 10,
+                   max_generations: 5,
+                   crossover: crossover,
+                   mutation: mutation
+                 })
+      end
+    end
+
     test "permits all valid binary operators" do
       for crossover <- [:single_point, :two_point, :uniform],
           mutation <- [:bit_flip] do
@@ -142,6 +224,17 @@ defmodule Petri.ConfigTest do
                    mutation: mutation
                  })
       end
+    end
+
+    test "rejects integer crossover with permutation encoding" do
+      assert {:error, _errors} =
+               Config.parse(%{
+                 encoding: :permutation,
+                 n: 5,
+                 population_size: 10,
+                 max_generations: 5,
+                 crossover: :blx_alpha
+               })
     end
 
     test "rejects real crossover with permutation encoding" do

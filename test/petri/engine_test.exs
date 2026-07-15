@@ -2,10 +2,112 @@ defmodule Petri.EngineTest do
   use ExUnit.Case, async: true
 
   alias Petri.Chromosome.Permutation
+  alias Petri.Chromosome.Integer, as: IntChr
   alias Petri.Engine
   alias Petri.Result
 
   describe "run/2" do
+    test "integer encoding returns a Result struct" do
+      result =
+        Engine.run(
+          fn c -> Petri.Chromosome.genes(c) |> Enum.sum() end,
+          %{
+            encoding: :integer,
+            bounds: [{0, 10}, {0, 10}, {0, 10}],
+            population_size: 10,
+            max_generations: 3,
+            seed: 42
+          }
+        )
+
+      assert %Result{} = result
+    end
+
+    test "integer encoding chromosomes stay valid" do
+      result =
+        Engine.run(
+          fn c -> Petri.Chromosome.genes(c) |> Enum.sum() end,
+          %{
+            encoding: :integer,
+            bounds: [{0, 10}, {0, 10}, {0, 10}],
+            population_size: 10,
+            max_generations: 5,
+            seed: 42
+          }
+        )
+
+      {best_chromosome, _} = result.best
+      assert %IntChr{} = best_chromosome
+      assert Petri.Chromosome.valid?(best_chromosome)
+    end
+
+    test "integer encoding converges toward upper bounds" do
+      fitness = fn c -> Petri.Chromosome.genes(c) |> Enum.sum() end
+
+      result =
+        Engine.run(fitness, %{
+          encoding: :integer,
+          bounds: [{0, 10}, {0, 10}, {0, 10}, {0, 10}, {0, 10}],
+          population_size: 50,
+          max_generations: 50,
+          seed: 42
+        })
+
+      {_best_chromosome, best_fitness} = result.best
+      assert best_fitness >= 30, "expected convergence toward 50, got #{best_fitness}"
+    end
+
+    test "integer encoding with sbx and uniform mutation" do
+      result =
+        Engine.run(
+          fn c -> Petri.Chromosome.genes(c) |> Enum.sum() end,
+          %{
+            encoding: :integer,
+            bounds: [{0, 100}, {0, 100}],
+            population_size: 30,
+            max_generations: 30,
+            crossover: :sbx,
+            mutation: :uniform,
+            seed: 42
+          }
+        )
+
+      {best_chromosome, _} = result.best
+      assert Petri.Chromosome.valid?(best_chromosome)
+    end
+
+    test "integer encoding is deterministic with same seed" do
+      config = %{
+        encoding: :integer,
+        bounds: [{0, 10}, {0, 10}],
+        population_size: 10,
+        max_generations: 3,
+        seed: 123
+      }
+
+      a = Engine.run(fn c -> Petri.Chromosome.genes(c) |> Enum.sum() end, config)
+      b = Engine.run(fn c -> Petri.Chromosome.genes(c) |> Enum.sum() end, config)
+
+      assert a == b
+    end
+
+    test "integer encoding tracks evaluations" do
+      result =
+        Engine.run(
+          fn c -> Petri.Chromosome.genes(c) |> Enum.sum() end,
+          %{
+            encoding: :integer,
+            bounds: [{0, 10}],
+            population_size: 10,
+            max_generations: 3,
+            elite_count: 1,
+            seed: 42
+          }
+        )
+
+      assert result.evaluations == 10 + result.generations_run * 9
+    end
+
     test "returns a Result struct" do
       result =
         Engine.run(
