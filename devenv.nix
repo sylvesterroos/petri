@@ -43,6 +43,10 @@ in
       # expert-lsp needs the erlang binary
       erlang
 
+      # SVG rasterization + WebP animation assembly
+      librsvg
+      ffmpeg
+
       nixfmt
     ]
     ++ lib.optionals stdenv.isLinux (

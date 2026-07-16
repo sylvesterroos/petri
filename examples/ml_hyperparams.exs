@@ -1,4 +1,5 @@
-Mix.install([{:petri, path: "."}, :nx])
+Mix.install([{:petri, path: "."}, :nx, {:exla, "~> 0.12"}])
+Nx.global_default_backend(EXLA.Backend)
 
 defmodule MLHyperparams do
   @moduledoc """
@@ -15,7 +16,7 @@ defmodule MLHyperparams do
   alias Petri.Chromosome.Real
 
   @n_features 10
-  @true_weights Nx.tensor([2.0, 3.0, -1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+  @true_weights_list [2.0, 3.0, -1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
   @n_train 100
   @n_test 40
@@ -41,10 +42,12 @@ defmodule MLHyperparams do
     {noise_train, _key} = Nx.Random.normal(Nx.take(keys, 2), 0.0, 0.1, shape: {@n_train})
     {noise_test, _key} = Nx.Random.normal(Nx.take(keys, 3), 0.0, 0.1, shape: {@n_test})
 
-    train_y = Nx.add(Nx.dot(train_x, @true_weights), noise_train)
-    test_y = Nx.add(Nx.dot(test_x, @true_weights), noise_test)
+    true_weights = Nx.tensor(@true_weights_list)
 
-    oracle_r2 = r2(test_y, Nx.dot(test_x, @true_weights))
+    train_y = Nx.add(Nx.dot(train_x, true_weights), noise_train)
+    test_y = Nx.add(Nx.dot(test_x, true_weights), noise_test)
+
+    oracle_r2 = r2(test_y, Nx.dot(test_x, true_weights))
 
     fitness = fn %Real{genes: [lr, lambda, epochs]} ->
       epochs_int = max(1, round(epochs))
@@ -56,8 +59,7 @@ defmodule MLHyperparams do
     # by a fraction α of their distance, which helps explore continuous
     # spaces without getting stuck. Gaussian mutation adds small
     # perturbations for local fine-tuning.
-    result =
-      Petri.run(fitness, %{
+    config = %{
         encoding: :real,
         bounds: [
           {1.0e-4, 1.0e-1},
@@ -66,6 +68,7 @@ defmodule MLHyperparams do
         ],
         population_size: 50,
         max_generations: 40,
+        stagnation_generations: 10,
         seed: 42,
         selection: :tournament,
         tournament_size: 3,
@@ -75,7 +78,11 @@ defmodule MLHyperparams do
         mutation: :gaussian,
         gaussian_sigma: 0.15,
         mutation_rate: 0.3
-      })
+      }
+
+    IO.puts("Running GA (#{config.max_generations} generations, pop #{config.population_size})...")
+
+    result = Petri.run(fitness, config)
 
     {best_chromosome, best_fitness} = result.best
     [lr, lambda, epochs] = best_chromosome.genes
@@ -100,8 +107,10 @@ defmodule MLHyperparams do
     Oracle R² (true wts):  #{:erlang.float_to_binary(oracle_r2, decimals: 4)}
 
     Learned weights vs true weights:
-    #{weight_table(Nx.to_list(final_weights), Nx.to_list(@true_weights))}
+    #{weight_table(Nx.to_list(final_weights), @true_weights_list)}
     """)
+
+    visualize(result.history)
   end
 
   # Vanilla gradient descent. The dataset is small enough to use the full
@@ -144,6 +153,166 @@ defmodule MLHyperparams do
       |> Enum.join("\n")
 
     header <> "\n" <> rows
+  end
+
+  def visualize(history) do
+    IO.puts("Building parameter charts...")
+
+    data =
+      history
+      |> Enum.with_index()
+      |> Enum.map(fn {snapshot, gen} ->
+        [lr, lambda, epochs] = snapshot.best_chromosome.genes
+        %{gen: gen, lr: lr, lambda: lambda, epochs: round(epochs), fitness: snapshot.max_fitness}
+      end)
+
+    n = length(data) - 1
+    frames = Enum.map(0..n, fn i -> chart_svg(data, i, n) end)
+
+    make_webp(frames, "hyperparams_evolution.webp", fps: 12)
+    IO.puts("▶ Open hyperparams_evolution.webp to watch the parameters evolve")
+  end
+
+  defp chart_svg(data, frame_n, total_n) do
+    w = 800
+    h = 200
+    ml = 60
+    mr = 20
+    mt = 16
+    mb = 28
+    pw = w - ml - mr
+    ph = h - mt - mb
+
+    panel = fn y_off, title, lo, hi, log?, extract, fmt ->
+      scale =
+        if log?,
+          do: fn v ->
+            max(v, lo)
+            |> then(&:math.log10(&1))
+            |> then(&((&1 - :math.log10(lo)) / (:math.log10(hi) - :math.log10(lo))))
+          end,
+          else: fn v -> (v - lo) / (hi - lo) end
+
+      # Grid lines + Y labels
+      grid =
+        0..5
+        |> Enum.map(fn g ->
+          t = g / 5
+          gy = y_off + mt + (1 - t) * ph
+
+          val =
+            if log?,
+              do: :math.pow(10, :math.log10(lo) + t * (:math.log10(hi) - :math.log10(lo))),
+              else: lo + t * (hi - lo)
+
+          label =
+            if log?,
+              do: :io_lib.format("~.2e", [val]) |> List.to_string(),
+              else: :erlang.float_to_binary(val, decimals: if(title =~ "R²", do: 2, else: 0))
+
+          ~s(<line x1="#{ml}" x2="#{w - mr}" y1="#{gy}" y2="#{gy}" stroke="#1e293b" stroke-width="0.5"/>) <>
+            ~s(<text x="#{ml - 3}" y="#{gy + 3}" fill="#64748b" font-family="monospace" font-size="9" text-anchor="end">#{label}</text>)
+        end)
+        |> Enum.join("\n        ")
+
+      # X labels
+      step = max(1, div(total_n, 10))
+
+      x_labels =
+        0..total_n
+        |> Enum.take_every(step)
+        |> Enum.map(fn g ->
+          x = ml + g / total_n * pw
+
+          ~s(<text x="#{x}" y="#{y_off + h - 5}" fill="#64748b" font-family="monospace" font-size="8" text-anchor="middle">#{g}</text>)
+        end)
+        |> Enum.join("\n        ")
+
+      # Polyline
+      points =
+        0..frame_n
+        |> Enum.map(fn j ->
+          v = extract.(Enum.at(data, j))
+          x = ml + j / total_n * pw
+          y = y_off + mt + (1 - scale.(v)) * ph
+          "#{x},#{y}"
+        end)
+        |> Enum.join(" ")
+
+      # Latest point marker
+      latest_v = extract.(Enum.at(data, frame_n))
+      lx = ml + frame_n / total_n * pw
+      ly = y_off + mt + (1 - scale.(latest_v)) * ph
+      val_str = fmt.(latest_v)
+
+      ~s"""
+      <rect width="#{w}" height="#{h}" x="0" y="#{y_off}" fill="#1a1a2e"/>
+      <text x="#{ml}" y="#{y_off + 12}" fill="#94a3b8" font-family="monospace" font-size="10">#{title}</text>
+      <text x="#{w - mr}" y="#{y_off + 12}" fill="#60a5fa" font-family="monospace" font-size="11" text-anchor="end" font-weight="bold">#{val_str}</text>
+      #{grid}
+      #{x_labels}
+      <polyline points="#{points}" fill="none" stroke="#4ade80" stroke-width="1.5"/>
+      <circle cx="#{lx}" cy="#{ly}" r="4" fill="#4ade80"/>
+      """
+    end
+
+    lr_fmt = fn v -> :io_lib.format("~.2e", [v]) |> List.to_string() end
+    lambda_fmt = fn v -> :io_lib.format("~.2e", [v]) |> List.to_string() end
+    epochs_fmt = fn v -> Integer.to_string(v) end
+    fitness_fmt = fn v -> :erlang.float_to_binary(v, decimals: 4) end
+
+    p0 = panel.(0, "Learning Rate", 1.0e-4, 1.0e-1, true, fn d -> d.lr end, lr_fmt)
+    p1 = panel.(200, "L2 Regularization λ", 1.0e-6, 1.0e-1, true, fn d -> d.lambda end, lambda_fmt)
+    p2 = panel.(400, "Training Epochs", 10, 200, false, fn d -> d.epochs end, epochs_fmt)
+    p3 = panel.(600, "Best Fitness (R²)", 0.0, 1.0, false, fn d -> d.fitness end, fitness_fmt)
+
+    ~s"""
+    <svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800">
+      #{p0}
+      #{p1}
+      #{p2}
+      #{p3}
+    </svg>
+    """
+    end
+
+    defp make_webp(frames, output, opts) do
+    fps = Keyword.get(opts, :fps, 30)
+    total = length(frames)
+
+    tmp = System.tmp_dir!() |> Path.join("petri_#{System.monotonic_time()}")
+    File.mkdir_p!(tmp)
+
+    Enum.with_index(frames)
+    |> Enum.each(fn {svg, i} ->
+      IO.write("\rGenerating frame #{i + 1}/#{total}...")
+      num = String.pad_leading(Integer.to_string(i), 4, "0")
+      File.write!(Path.join(tmp, "frame_#{num}.svg"), svg)
+    end)
+    IO.puts("")
+
+    svgs = Path.wildcard(Path.join(tmp, "frame_*.svg"))
+    svgs
+    |> Enum.with_index(1)
+    |> Enum.each(fn {svg_path, n} ->
+      IO.write("\rRasterizing #{n}/#{total}...")
+      System.cmd("rsvg-convert", ["-b", "#1a1a2e", "-o", String.replace_suffix(svg_path, ".svg", ".png"), svg_path])
+    end)
+    IO.puts("")
+
+    IO.write("Encoding #{output}...")
+    System.cmd("ffmpeg", [
+      "-y", "-v", "quiet", "-framerate", Integer.to_string(fps),
+      "-i", Path.join(tmp, "frame_%04d.png"),
+      "-c:v", "libwebp_anim",
+      "-lossless", "0",
+      "-quality", "80",
+      "-loop", "0",
+      output
+    ])
+    IO.puts(" done")
+
+    File.rm_rf!(tmp)
   end
 end
 

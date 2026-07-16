@@ -48,3 +48,6 @@ devenv.local.yaml
 .pre-commit-config.yaml
 
 .hermes/
+
+# Visualizations from the examples
+/*.webp

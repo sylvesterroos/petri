@@ -12,7 +12,7 @@ defmodule RingInscription do
 
   alias Petri.Chromosome.Integer, as: Chromosome
 
-  @target "One Ring to rule them all, One Ring to find them, One Ring to bring them all and in the darkness bind them"
+  @target "One Ring to rule them all, One Ring to find them, One Ring to bring them all, and in the darkness bind them"
 
   def run do
     n = String.length(@target)
@@ -45,6 +45,7 @@ defmodule RingInscription do
         bounds: List.duplicate({0, 255}, n),
         population_size: 200,
         max_generations: 10_000,
+        stagnation_generations: 200,
         selection: :tournament,
         tournament_size: 5,
         crossover: :two_point,
