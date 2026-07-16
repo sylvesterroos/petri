@@ -12,6 +12,10 @@ defmodule Petri.MixProject do
         "A multi-representation genetic algorithm library with representation-specific crossover and mutation operators.",
       source_url: "https://github.com/sylvesterroos/petri",
       homepage_url: "https://github.com/sylvesterroos/petri",
+      docs: [
+        main: "Petri",
+        extras: ["README.md"]
+      ],
       package: package(),
       deps: deps(),
       aliases: aliases()
