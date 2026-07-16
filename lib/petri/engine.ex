@@ -210,7 +210,7 @@ defmodule Petri.Engine do
     {_, generation_fitness} = generation_best
     {_, best_fitness} = best
 
-    if generation_fitness >= best_fitness do
+    if generation_fitness > best_fitness do
       {generation_best, state.generation}
     else
       {best, state.last_improvement_generation}
