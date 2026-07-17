@@ -75,10 +75,10 @@ elixir examples/ring_inscription.exs
 
 | Example | Encoding | What it does |
 |---|---|---|
-| `tsp.exs` | permutation | Order crossover + inversion on Berlin52 |
-| `ml_hyperparams.exs` | real | BLX-α + Gaussian mutation tuning a linear regression |
-| `feature_selection.exs` | binary | Uniform crossover + bit-flip for feature subset selection |
-| `ring_inscription.exs` | integer | Two-point crossover + uniform mutation, evolve a string via bigram fitness |
+| `tsp.exs` | permutation | Find the shortest tour through the 52 cities of Berlin52 |
+| `ml_hyperparams.exs` | real | Tune learning rate, regularization, and epochs for a regression model |
+| `feature_selection.exs` | binary | Pick the 4 predictive features out of 20 before training |
+| `ring_inscription.exs` | integer | Evolve an arbitrary string toward a target quote character by character |
 
 ## Documentation
 
