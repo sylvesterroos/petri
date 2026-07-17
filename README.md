@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/sylvesterroos/petri/master/assets/logo.svg" alt="Petri" width="200">
+  <img src="https://raw.githubusercontent.com/sylvesterroos/petri/master/assets/hero.svg" alt="Petri" width="600">
 </div>
 
 # Petri

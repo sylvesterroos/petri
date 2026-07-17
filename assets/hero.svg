@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 380" width="369" height="171">
+  <style>
+    .title { fill: #2d2d2d; font-family: system-ui, -apple-system, sans-serif; }
+    @media (prefers-color-scheme: dark) {
+      .title { fill: #ffffff; }
+    }
+  </style>
+  <g transform="translate(32, 50) scale(1.4)">
+  <!-- Buitenste rand van de petrischaal -->
+    <circle cx="100" cy="100" r="94" fill="#dceefb" stroke="#a9d3ea" stroke-width="4"/>
+
+    <!-- Binnenste schaal met agar -->
+    <circle cx="100" cy="100" r="84" fill="#fbe3d4" stroke="#e8b998" stroke-width="3"/>
+
+    <!-- Glans op het glas -->
+    <path d="M 21 71 A 84 84 0 0 1 71 21" fill="none" stroke="#ffffff" stroke-width="6" stroke-linecap="round" opacity="0.5"/>
+
+    <!-- Bacterie -->
+    <g transform="translate(86,103) rotate(-10)">
+      <!-- Bundel trilhaartjes aan één uiteinde -->
+      <path d="M 70 -16 Q 90 -22 99 -13" fill="none" stroke="#3f9c5d" stroke-width="7" stroke-linecap="round"/>
+      <path d="M 75 0 Q 95 0 104 4" fill="none" stroke="#3f9c5d" stroke-width="7" stroke-linecap="round"/>
+      <path d="M 70 16 Q 88 23 96 19" fill="none" stroke="#3f9c5d" stroke-width="7" stroke-linecap="round"/>
+
+      <!-- Lichaam: langwerpige staafvorm -->
+      <rect x="-72" y="-42" width="144" height="84" rx="42" ry="42" fill="#6fcf7d" stroke="#3f9c5d" stroke-width="5"/>
+
+      <!-- Nucleoid-stippen -->
+      <ellipse cx="-6" cy="-26" rx="7" ry="5" fill="#3f9c5d" opacity="0.55"/>
+      <ellipse cx="32" cy="22" rx="6" ry="4" fill="#3f9c5d" opacity="0.55"/>
+
+      <!-- Ogen -->
+      <circle cx="-30" cy="-8" r="14" fill="white" stroke="#2d2d2d" stroke-width="3.5"/>
+      <circle cx="4" cy="-9" r="14" fill="white" stroke="#2d2d2d" stroke-width="3.5"/>
+      <circle cx="-27" cy="-5" r="7" fill="#2d2d2d"/>
+      <circle cx="7" cy="-6" r="7" fill="#2d2d2d"/>
+
+      <!-- Blosjes -->
+      <ellipse cx="-50" cy="16" rx="9" ry="6" fill="#ff9baa" opacity="0.75"/>
+      <ellipse cx="24" cy="16" rx="9" ry="6" fill="#ff9baa" opacity="0.75"/>
+
+      <!-- Glimlach -->
+      <path d="M -28 14 Q -10 32 10 12" fill="none" stroke="#2d2d2d" stroke-width="5.5" stroke-linecap="round"/>
+    </g>
+  </g>
+
+  <text class="title" x="344" y="190" dy="0.35em" font-size="195" font-weight="700" text-anchor="start">Petri</text>
+</svg>
