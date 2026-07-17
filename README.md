@@ -1,21 +1,31 @@
+<div align="center">
+  <img src="https://raw.githubusercontent.com/sylvesterroos/petri/master/assets/logo.svg" alt="Petri" width="200">
+</div>
+
 # Petri
 
-A multi-representation genetic algorithm library for Elixir.
+[![Hex.pm](https://img.shields.io/hexpm/v/petri.svg)](https://hex.pm/packages/petri)
+[![Docs](https://img.shields.io/badge/docs-hexdocs-purple.svg)](https://hexdocs.pm/petri)
+[![License](https://img.shields.io/badge/license-LGPL--3.0--or--later-blue.svg)](LICENSE)
 
-Supports multiple chromosome encodings:
-real (continuous), permutation (ordering), binary, integer. Each has its own
-crossover and mutation operators. Selection, termination, and the
-generational engine are shared.
+A genetic algorithm library for Elixir.
 
-## Usage
+## What's a genetic algorithm?
 
-Some snippets from `examples/`.
+A genetic algorithm is a form of evolutionary optimization for problems with too many combinations to brute force. For example: the shortest route through 52 cities, the best hyperparameters for a model, or the most useful features in a dataset. A dataset of 50 features has a quadrillion combinations. At a million checks per second you're waiting 36 years. A GA gets a good answer before you've dropped programming and taken up farming.
 
-### Permutation: TSP on Berlin52
+A GA works like natural selection. Generate a population of candidate solutions, score them with a fitness function you write, pick the best, cross them to create new candidates, mutate a few to explore. Repeat for a few hundred generations. The result is rarely the mathematical optimum, but it gets there while brute force is just getting started.
+
+Petri handles the selection, crossover, mutation, and generational loop. You pick a chromosome encoding that fits your problem, write a fitness function, and run it.
+
+## Quick start
+
+Below is the traveling salesman problem on Berlin52: 52 cities, find the shortest tour that visits each once.
 
 ```elixir
 alias Petri.Chromosome.Permutation
 
+# Fitness: shorter tours score higher (a GA maximizes, so invert distance)
 fitness = fn %Permutation{genes: tour} ->
   1.0 / tour_distance(tour)
 end
@@ -34,132 +44,27 @@ result =
     mutation: :inversion
   })
 
-{best_tour, best_fitness} = result.best
-best_distance = 1.0 / best_fitness
+{best_tour, _best_fitness} = result.best
 ```
 
-From [`examples/tsp.exs`](examples/tsp.exs).
+> See [`examples/tsp.exs`](examples/tsp.exs) for the full runnable script with city coordinates and distance calculation.
 
-### Real: ML hyperparameter tuning
+## Capabilities
 
-```elixir
-alias Petri.Chromosome.Real
+Four chromosome encodings, each with operators tuned for that representation.
 
-fitness = fn %Real{genes: [lr, lambda, epochs]} ->
-  epochs_int = max(1, round(epochs))
-  weights = train(train_x, train_y, lr, lambda, epochs_int)
-  r2(test_y, Nx.dot(test_x, weights))
-end
+| Encoding | Use when | Shape |
+|---|---|---|
+| `:real` | Continuous parameters | `[0.001, 0.5, 120.0]` |
+| `:integer` | Discrete counts | `[3, 17, 255]` |
+| `:permutation` | Ordering problems | `[4, 0, 7, 2, 5, 1, 3, 6]` |
+| `:binary` | Subset selection | `[1, 0, 1, 1, 0]` |
 
-result =
-  Petri.run(fitness, %{
-    encoding: :real,
-    bounds: [{1.0e-4, 1.0e-1}, {1.0e-6, 1.0e-1}, {10.0, 200.0}],
-    population_size: 50,
-    max_generations: 40,
-    seed: 42,
-    selection: :tournament,
-    tournament_size: 3,
-    elite_count: 3,
-    crossover: :blx_alpha,
-    blx_alpha_param: 0.5,
-    mutation: :gaussian,
-    gaussian_sigma: 0.15,
-    mutation_rate: 0.3
-  })
-
-{best_chromosome, best_fitness} = result.best
-[lr, lambda, epochs] = best_chromosome.genes
-```
-
-From [`examples/ml_hyperparams.exs`](examples/ml_hyperparams.exs).
-
-### Binary: feature subset selection
-
-```elixir
-alias Petri.Chromosome.Binary
-
-fitness = fn %Binary{genes: mask} ->
-  predictions =
-    Enum.map(data, fn row ->
-      row |> Enum.zip(mask)
-      |> Enum.reduce(0.0, fn {v, m}, acc -> if m == 1, do: acc + v, else: acc end)
-    end)
-
-  mse =
-    Enum.zip(predictions, targets)
-    |> Enum.reduce(0.0, fn {p, t}, acc -> acc + (p - t) ** 2 end)
-    |> Kernel./(@n_samples)
-
-  1.0 / (1.0 + mse)
-end
-
-result =
-  Petri.run(fitness, %{
-    encoding: :binary,
-    length: 20,
-    population_size: 80,
-    max_generations: 80,
-    seed: 17,
-    selection: :tournament,
-    tournament_size: 3,
-    elite_count: 3,
-    crossover: :uniform,
-    mutation: :bit_flip,
-    mutation_rate: 0.4,
-    mutation_per_gene_rate: 0.05
-  })
-
-{best_chromosome, best_fitness} = result.best
-```
-
-From [`examples/feature_selection.exs`](examples/feature_selection.exs).
-
-### Integer: ring inscription
-
-```elixir
-alias Petri.Chromosome.Integer, as: Chromosome
-
-fitness = fn %Chromosome{genes: string} ->
-  character_score =
-    string
-    |> Enum.zip(target_chars)
-    |> Enum.count(fn {a, b} -> a == b end)
-
-  bigram_score =
-    string
-    |> bigrams()
-    |> Enum.zip(target_bigrams)
-    |> Enum.count(fn {a, b} -> a == b end)
-
-  character_score + 2 * bigram_score
-end
-
-result =
-  Petri.run(fitness, %{
-    encoding: :integer,
-    bounds: List.duplicate({0, 255}, n),
-    population_size: 200,
-    max_generations: 10_000,
-    seed: 9,
-    selection: :tournament,
-    tournament_size: 5,
-    elite_count: 1,
-    crossover: :two_point,
-    crossover_rate: 0.9,
-    mutation: :uniform,
-    mutation_per_gene_rate: 0.01,
-    mutation_rate: 1.0,
-    fitness_threshold: max_fitness * 1.0
-  })
-```
-
-From [`examples/ring_inscription.exs`](examples/ring_inscription.exs).
+Config validation catches operator/encoding mismatches up front so you won't get surprises mid-run.
 
 ## Running the examples
 
-Standalone `.exs` scripts that use `Mix.install` to pull in dependencies.
-Run from the repo root with `elixir` (not `mix`):
+Standalone scripts that pull in Petri via `Mix.install`. Run from the repo root with `elixir` (not `mix`):
 
 ```
 elixir examples/tsp.exs
@@ -170,7 +75,15 @@ elixir examples/ring_inscription.exs
 
 | Example | Encoding | What it does |
 |---|---|---|
-| `tsp.exs` | permutation | Order crossover + swap mutation on Berlin52 |
+| `tsp.exs` | permutation | Order crossover + inversion on Berlin52 |
 | `ml_hyperparams.exs` | real | BLX-α + Gaussian mutation tuning a linear regression |
 | `feature_selection.exs` | binary | Uniform crossover + bit-flip for feature subset selection |
 | `ring_inscription.exs` | integer | Two-point crossover + uniform mutation, evolve a string via bigram fitness |
+
+## Documentation
+
+Full API docs at [hexdocs.pm/petri](https://hexdocs.pm/petri).
+
+## License
+
+LGPL-3.0-or-later. See [LICENSE](LICENSE).
