@@ -10,7 +10,7 @@ defmodule Petri.Mutation.PermutationTest do
     test "returns a valid permutation" do
       seed(123)
       parent = %Permutation{genes: [0, 1, 2, 3, 4]}
-      child = PermMutation.swap(parent, %{})
+      child = PermMutation.swap(parent, [])
 
       assert Petri.Chromosome.valid?(child)
       assert Petri.Chromosome.length(child) == 5
@@ -20,7 +20,7 @@ defmodule Petri.Mutation.PermutationTest do
     test "leaves a length-1 permutation unchanged" do
       seed(42)
       parent = %Permutation{genes: [0]}
-      child = PermMutation.swap(parent, %{})
+      child = PermMutation.swap(parent, [])
 
       assert Petri.Chromosome.genes(child) == [0]
     end
@@ -29,9 +29,9 @@ defmodule Petri.Mutation.PermutationTest do
       parent = %Permutation{genes: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}
 
       seed(7)
-      first = PermMutation.swap(parent, %{})
+      first = PermMutation.swap(parent, [])
       seed(7)
-      second = PermMutation.swap(parent, %{})
+      second = PermMutation.swap(parent, [])
 
       assert Petri.Chromosome.genes(first) == Petri.Chromosome.genes(second)
     end
@@ -40,9 +40,9 @@ defmodule Petri.Mutation.PermutationTest do
       parent = %Permutation{genes: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}
 
       seed(1)
-      first = PermMutation.swap(parent, %{})
+      first = PermMutation.swap(parent, [])
       seed(2)
-      second = PermMutation.swap(parent, %{})
+      second = PermMutation.swap(parent, [])
 
       assert Petri.Chromosome.genes(first) != Petri.Chromosome.genes(second)
     end
@@ -50,7 +50,7 @@ defmodule Petri.Mutation.PermutationTest do
     test "swaps exactly two positions" do
       seed(99)
       parent = %Permutation{genes: [0, 1, 2, 3, 4]}
-      child = PermMutation.swap(parent, %{})
+      child = PermMutation.swap(parent, [])
 
       parent_genes = Petri.Chromosome.genes(parent)
       child_genes = Petri.Chromosome.genes(child)
@@ -67,7 +67,7 @@ defmodule Petri.Mutation.PermutationTest do
     test "returns a valid permutation" do
       seed(123)
       parent = %Permutation{genes: [0, 1, 2, 3, 4]}
-      child = PermMutation.inversion(parent, %{})
+      child = PermMutation.inversion(parent, [])
 
       assert Petri.Chromosome.valid?(child)
       assert Petri.Chromosome.length(child) == 5
@@ -77,7 +77,7 @@ defmodule Petri.Mutation.PermutationTest do
     test "leaves a length-1 permutation unchanged" do
       seed(42)
       parent = %Permutation{genes: [0]}
-      child = PermMutation.inversion(parent, %{})
+      child = PermMutation.inversion(parent, [])
 
       assert Petri.Chromosome.genes(child) == [0]
     end
@@ -86,9 +86,9 @@ defmodule Petri.Mutation.PermutationTest do
       parent = %Permutation{genes: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}
 
       seed(7)
-      first = PermMutation.inversion(parent, %{})
+      first = PermMutation.inversion(parent, [])
       seed(7)
-      second = PermMutation.inversion(parent, %{})
+      second = PermMutation.inversion(parent, [])
 
       assert Petri.Chromosome.genes(first) == Petri.Chromosome.genes(second)
     end
@@ -96,7 +96,7 @@ defmodule Petri.Mutation.PermutationTest do
     test "reverses a segment of the permutation" do
       seed(99)
       parent = %Permutation{genes: [0, 1, 2, 3, 4]}
-      child = PermMutation.inversion(parent, %{})
+      child = PermMutation.inversion(parent, [])
 
       assert Petri.Chromosome.valid?(child)
       assert Petri.Chromosome.length(child) == 5
@@ -112,7 +112,7 @@ defmodule Petri.Mutation.PermutationTest do
     test "returns a valid permutation" do
       seed(123)
       parent = %Permutation{genes: [0, 1, 2, 3, 4]}
-      child = PermMutation.insert(parent, %{})
+      child = PermMutation.insert(parent, [])
 
       assert Petri.Chromosome.valid?(child)
       assert Petri.Chromosome.length(child) == 5
@@ -122,7 +122,7 @@ defmodule Petri.Mutation.PermutationTest do
     test "leaves a length-1 permutation unchanged" do
       seed(42)
       parent = %Permutation{genes: [0]}
-      child = PermMutation.insert(parent, %{})
+      child = PermMutation.insert(parent, [])
 
       assert Petri.Chromosome.genes(child) == [0]
     end
@@ -131,9 +131,9 @@ defmodule Petri.Mutation.PermutationTest do
       parent = %Permutation{genes: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}
 
       seed(7)
-      first = PermMutation.insert(parent, %{})
+      first = PermMutation.insert(parent, [])
       seed(7)
-      second = PermMutation.insert(parent, %{})
+      second = PermMutation.insert(parent, [])
 
       assert Petri.Chromosome.genes(first) == Petri.Chromosome.genes(second)
     end
@@ -141,7 +141,7 @@ defmodule Petri.Mutation.PermutationTest do
     test "preserves all genes" do
       seed(99)
       parent = %Permutation{genes: [0, 1, 2, 3, 4]}
-      child = PermMutation.insert(parent, %{})
+      child = PermMutation.insert(parent, [])
 
       assert Petri.Chromosome.valid?(child)
       parent_genes = Petri.Chromosome.genes(parent)

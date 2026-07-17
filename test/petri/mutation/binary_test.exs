@@ -10,7 +10,7 @@ defmodule Petri.Mutation.BinaryTest do
     test "returns a Binary chromosome" do
       seed(42)
       parent = %Binary{genes: [0, 1, 1, 0, 1]}
-      child = Mutation.bit_flip(parent, %{mutation_per_gene_rate: 0.5})
+      child = Mutation.bit_flip(parent, [mutation_per_gene_rate: 0.5])
 
       assert %Binary{} = child
     end
@@ -20,7 +20,7 @@ defmodule Petri.Mutation.BinaryTest do
 
       for s <- 1..200 do
         seed(s)
-        child = Mutation.bit_flip(parent, %{mutation_per_gene_rate: 0.5})
+        child = Mutation.bit_flip(parent, [mutation_per_gene_rate: 0.5])
 
         assert Petri.Chromosome.valid?(child), "seed=#{s}: invalid child"
       end
@@ -29,14 +29,14 @@ defmodule Petri.Mutation.BinaryTest do
     test "preserves chromosome length" do
       seed(42)
       parent = %Binary{genes: [0, 1, 1, 0, 1]}
-      child = Mutation.bit_flip(parent, %{mutation_per_gene_rate: 0.5})
+      child = Mutation.bit_flip(parent, [mutation_per_gene_rate: 0.5])
 
       assert Petri.Chromosome.length(child) == Petri.Chromosome.length(parent)
     end
 
     test "is deterministic with same seed" do
       parent = %Binary{genes: [0, 1, 1, 0, 1, 0, 0, 1]}
-      cfg = %{mutation_per_gene_rate: 0.5}
+      cfg = [mutation_per_gene_rate: 0.5]
 
       seed(42)
       a = Mutation.bit_flip(parent, cfg)
@@ -48,7 +48,7 @@ defmodule Petri.Mutation.BinaryTest do
 
     test "can produce a different child" do
       parent = %Binary{genes: [0, 1, 1, 0, 1, 0, 0, 1]}
-      cfg = %{mutation_per_gene_rate: 0.5}
+      cfg = [mutation_per_gene_rate: 0.5]
 
       seed(1)
       a = Mutation.bit_flip(parent, cfg)
@@ -60,7 +60,7 @@ defmodule Petri.Mutation.BinaryTest do
 
     test "no mutation when rate is 0" do
       parent = %Binary{genes: [0, 1, 1, 0, 1]}
-      cfg = %{mutation_per_gene_rate: 0.0}
+      cfg = [mutation_per_gene_rate: 0.0]
 
       seed(42)
       child = Mutation.bit_flip(parent, cfg)
@@ -70,7 +70,7 @@ defmodule Petri.Mutation.BinaryTest do
 
     test "full mutation flips every bit" do
       parent = %Binary{genes: [0, 0, 0, 0, 0]}
-      cfg = %{mutation_per_gene_rate: 1.0}
+      cfg = [mutation_per_gene_rate: 1.0]
 
       seed(42)
       child = Mutation.bit_flip(parent, cfg)
@@ -85,7 +85,7 @@ defmodule Petri.Mutation.BinaryTest do
       flips =
         Enum.map(1..200, fn s ->
           seed(s)
-          child = Mutation.bit_flip(parent, %{})
+          child = Mutation.bit_flip(parent, [])
 
           Enum.zip(child.genes, parent.genes)
           |> Enum.count(fn {a, b} -> a != b end)

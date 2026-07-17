@@ -16,11 +16,11 @@ defmodule Petri.Termination do
   alias Petri.State
 
   @doc false
-  def stop?(config, %State{} = state) do
-    max_generations = Map.get(config, :max_generations)
-    fitness_threshold = Map.get(config, :fitness_threshold)
-    stagnation_generations = Map.get(config, :stagnation_generations)
-    time_budget_ms = Map.get(config, :time_budget_ms)
+  def stop?(config, %State{} = state) when is_list(config) do
+    max_generations = Keyword.get(config, :max_generations)
+    fitness_threshold = Keyword.get(config, :fitness_threshold)
+    stagnation_generations = Keyword.get(config, :stagnation_generations)
+    time_budget_ms = Keyword.get(config, :time_budget_ms)
 
     [
       not is_nil(max_generations) and state.generation >= max_generations,

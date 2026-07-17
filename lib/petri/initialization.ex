@@ -4,7 +4,7 @@ defmodule Petri.Initialization do
 
   ## Dispatch
 
-  `init_random/1` takes a config map with an `:encoding` key and returns
+  `init_random/1` takes a config keyword list with an `:encoding` key and returns
   a **single** chromosome. Build a population by calling it repeatedly.
 
   ## Reproducibility
@@ -41,17 +41,24 @@ defmodule Petri.Initialization do
 
   ## Examples
 
-      iex> c = Petri.Initialization.init_random(%{encoding: :permutation, n: 5})
+      iex> c = Petri.Initialization.init_random([encoding: :permutation, n: 5])
       iex> Petri.Chromosome.valid?(c) and Petri.Chromosome.length(c) == 5
       true
   """
   def init_random(config)
 
-  def init_random(%{encoding: :permutation, n: n}) do
-    %Permutation{genes: Enum.shuffle(0..(n - 1))}
+  def init_random(config) do
+    case config[:encoding] do
+      :permutation -> %Permutation{genes: Enum.shuffle(0..(config[:n] - 1))}
+      :real -> init_real_random(config)
+      :binary -> %Binary{genes: (for _ <- 1..config[:length], do: Enum.random([0, 1]))}
+      :integer -> init_integer_random(config)
+    end
   end
 
-  def init_random(%{encoding: :real, bounds: bounds}) do
+  defp init_real_random(config) do
+    bounds = Keyword.fetch!(config, :bounds)
+
     genes =
       Enum.map(bounds, fn {lo, hi} ->
         lo + :rand.uniform() * (hi - lo)
@@ -60,12 +67,9 @@ defmodule Petri.Initialization do
     %Real{genes: genes, bounds: bounds}
   end
 
-  def init_random(%{encoding: :binary, length: length}) do
-    genes = for _ <- 1..length, do: Enum.random([0, 1])
-    %Binary{genes: genes}
-  end
+  defp init_integer_random(config) do
+    bounds = Keyword.fetch!(config, :bounds)
 
-  def init_random(%{encoding: :integer, bounds: bounds}) do
     genes =
       Enum.map(bounds, fn {lo, hi} ->
         lo + :rand.uniform(hi - lo + 1) - 1
@@ -83,9 +87,9 @@ defmodule Petri.Initialization do
 
   Returns a list of `RealChromosome` structs, not a single chromosome.
   """
-  def init_latin_hypercube(%{encoding: :real} = config) do
-    bounds = Map.fetch!(config, :bounds)
-    pop_size = Map.fetch!(config, :population_size)
+  def init_latin_hypercube(config) do
+    bounds = Keyword.fetch!(config, :bounds)
+    pop_size = Keyword.fetch!(config, :population_size)
 
     # For each dimension, create N strata and sample within each
     samples_per_dim =

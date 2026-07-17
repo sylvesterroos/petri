@@ -59,7 +59,7 @@ defmodule MLHyperparams do
     # by a fraction α of their distance, which helps explore continuous
     # spaces without getting stuck. Gaussian mutation adds small
     # perturbations for local fine-tuning.
-    config = %{
+    config = [
         encoding: :real,
         bounds: [
           {1.0e-4, 1.0e-1},
@@ -78,9 +78,9 @@ defmodule MLHyperparams do
         mutation: :gaussian,
         gaussian_sigma: 0.15,
         mutation_rate: 0.3
-      }
+      ]
 
-    IO.puts("Running GA (#{config.max_generations} generations, pop #{config.population_size})...")
+    IO.puts("Running GA (#{config[:max_generations]} generations, pop #{config[:population_size]})...")
 
     result = Petri.run(fitness, config)
 

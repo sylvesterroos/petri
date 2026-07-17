@@ -8,7 +8,7 @@ defmodule Petri.Mutation.Binary do
   per mutation event on average).
   """
   def bit_flip(%Binary{genes: genes} = chromosome, config) do
-    per_gene_rate = Map.get(config, :mutation_per_gene_rate, 1.0 / max(length(genes), 1))
+    per_gene_rate = Keyword.get(config, :mutation_per_gene_rate, 1.0 / max(length(genes), 1))
 
     new_genes =
       Enum.map(genes, fn

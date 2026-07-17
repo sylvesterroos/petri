@@ -40,7 +40,7 @@ defmodule RingInscription do
     # Tournament selection favors chromosomes with more correct bigrams, while
     # elitism preserves the best complete chromosome unchanged.
     result =
-      Petri.run(fitness, %{
+      Petri.run(fitness, [
         encoding: :integer,
         bounds: List.duplicate({0, 255}, n),
         population_size: 200,
@@ -56,7 +56,7 @@ defmodule RingInscription do
         elite_count: 1,
         fitness_threshold: max_fitness * 1.0,
         seed: 9
-      })
+      ])
 
     animate(result.history)
 

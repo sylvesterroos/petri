@@ -10,7 +10,7 @@ defmodule Petri.Mutation.Permutation.InversionTest do
     test "returns a valid permutation" do
       seed(123)
       parent = %Permutation{genes: [0, 1, 2, 3, 4]}
-      child = PermMutation.inversion(parent, %{})
+      child = PermMutation.inversion(parent, [])
 
       assert Petri.Chromosome.valid?(child)
       assert Petri.Chromosome.length(child) == 5
@@ -20,7 +20,7 @@ defmodule Petri.Mutation.Permutation.InversionTest do
     test "leaves a length-1 permutation unchanged" do
       seed(42)
       parent = %Permutation{genes: [0]}
-      child = PermMutation.inversion(parent, %{})
+      child = PermMutation.inversion(parent, [])
 
       assert Petri.Chromosome.genes(child) == [0]
     end
@@ -28,7 +28,7 @@ defmodule Petri.Mutation.Permutation.InversionTest do
     test "leaves an empty permutation unchanged" do
       seed(42)
       parent = %Permutation{genes: []}
-      child = PermMutation.inversion(parent, %{})
+      child = PermMutation.inversion(parent, [])
 
       assert Petri.Chromosome.genes(child) == []
     end
@@ -37,9 +37,9 @@ defmodule Petri.Mutation.Permutation.InversionTest do
       parent = %Permutation{genes: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}
 
       seed(7)
-      first = PermMutation.inversion(parent, %{})
+      first = PermMutation.inversion(parent, [])
       seed(7)
-      second = PermMutation.inversion(parent, %{})
+      second = PermMutation.inversion(parent, [])
 
       assert Petri.Chromosome.genes(first) == Petri.Chromosome.genes(second)
     end
@@ -48,9 +48,9 @@ defmodule Petri.Mutation.Permutation.InversionTest do
       parent = %Permutation{genes: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}
 
       seed(1)
-      first = PermMutation.inversion(parent, %{})
+      first = PermMutation.inversion(parent, [])
       seed(2)
-      second = PermMutation.inversion(parent, %{})
+      second = PermMutation.inversion(parent, [])
 
       assert Petri.Chromosome.genes(first) != Petri.Chromosome.genes(second)
     end
@@ -60,7 +60,7 @@ defmodule Petri.Mutation.Permutation.InversionTest do
 
       # With a fixed seed we assert the specific segment is reversed.
       seed(123)
-      child = PermMutation.inversion(parent, %{})
+      child = PermMutation.inversion(parent, [])
 
       # Find the reversed segment by locating where order differs.
       mismatches =

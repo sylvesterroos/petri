@@ -15,14 +15,14 @@ defmodule Petri.Crossover.PermutationTest do
     test "returns a two-element tuple of offspring for every seed" do
       for seed <- @validity_seeds do
         seed(seed)
-        assert match?({%Permutation{}, %Permutation{}}, Crossover.pmx(@p0, @p1, %{}))
+        assert match?({%Permutation{}, %Permutation{}}, Crossover.pmx(@p0, @p1, []))
       end
     end
 
     test "both offspring are valid permutations" do
       for seed <- @validity_seeds do
         seed(seed)
-        {o0, o1} = Crossover.pmx(@p0, @p1, %{})
+        {o0, o1} = Crossover.pmx(@p0, @p1, [])
 
         assert Petri.Chromosome.valid?(o0), "seed=#{seed}: o0 is not valid"
         assert Petri.Chromosome.valid?(o1), "seed=#{seed}: o1 is not valid"
@@ -32,7 +32,7 @@ defmodule Petri.Crossover.PermutationTest do
     test "offspring genes are permutations of the parents' value set" do
       for seed <- @validity_seeds do
         seed(seed)
-        {o0, o1} = Crossover.pmx(@p0, @p1, %{})
+        {o0, o1} = Crossover.pmx(@p0, @p1, [])
 
         assert Enum.sort(o0.genes) == Enum.sort(@p0.genes),
                "seed=#{seed}: o0 genes are not a permutation of p0"
@@ -45,7 +45,7 @@ defmodule Petri.Crossover.PermutationTest do
     test "offspring length equals parent length" do
       for seed <- @validity_seeds do
         seed(seed)
-        {o0, o1} = Crossover.pmx(@p0, @p1, %{})
+        {o0, o1} = Crossover.pmx(@p0, @p1, [])
 
         assert Petri.Chromosome.length(o0) == Petri.Chromosome.length(@p0),
                "seed=#{seed}: o0 length mismatch"
@@ -59,7 +59,7 @@ defmodule Petri.Crossover.PermutationTest do
       recombined? =
         Enum.any?(@validity_seeds, fn seed ->
           seed(seed)
-          {o0, _o1} = Crossover.pmx(@p0, @p1, %{})
+          {o0, _o1} = Crossover.pmx(@p0, @p1, [])
           o0.genes != @p0.genes and o0.genes != @p1.genes
         end)
 
@@ -71,7 +71,7 @@ defmodule Petri.Crossover.PermutationTest do
     test "identical parents produce offspring equal to the parent" do
       seed(1)
       p = %Permutation{genes: [0, 1, 2, 3, 4, 5, 6, 7]}
-      {o0, o1} = Crossover.pmx(p, p, %{})
+      {o0, o1} = Crossover.pmx(p, p, [])
 
       assert o0.genes == p.genes
       assert o1.genes == p.genes
@@ -81,27 +81,27 @@ defmodule Petri.Crossover.PermutationTest do
   describe "pmx/3 — determinism" do
     test "same seed produces identical offspring" do
       seed(42)
-      a = Crossover.pmx(@p0, @p1, %{})
+      a = Crossover.pmx(@p0, @p1, [])
       seed(42)
-      b = Crossover.pmx(@p0, @p1, %{})
+      b = Crossover.pmx(@p0, @p1, [])
       assert a == b
     end
   end
 
   describe "pmx/3 — edge cases" do
     test "empty parents produce empty offspring" do
-      assert Crossover.pmx(%Permutation{genes: []}, %Permutation{genes: []}, %{}) ==
+      assert Crossover.pmx(%Permutation{genes: []}, %Permutation{genes: []}, []) ==
                {%Permutation{genes: []}, %Permutation{genes: []}}
     end
 
     test "single-element permutations produce single-element offspring" do
-      assert Crossover.pmx(%Permutation{genes: [0]}, %Permutation{genes: [0]}, %{}) ==
+      assert Crossover.pmx(%Permutation{genes: [0]}, %Permutation{genes: [0]}, []) ==
                {%Permutation{genes: [0]}, %Permutation{genes: [0]}}
     end
 
     test "two-element permutations preserve the value set" do
       {o0, o1} =
-        Crossover.pmx(%Permutation{genes: [0, 1]}, %Permutation{genes: [1, 0]}, %{})
+        Crossover.pmx(%Permutation{genes: [0, 1]}, %Permutation{genes: [1, 0]}, [])
 
       assert Enum.sort(o0.genes) == [0, 1]
       assert Enum.sort(o1.genes) == [0, 1]
@@ -114,14 +114,14 @@ defmodule Petri.Crossover.PermutationTest do
         Crossover.pmx(
           %Permutation{genes: [0, 1, 2]},
           %Permutation{genes: [0, 1]},
-          %{}
+          []
         )
       end
     end
 
     test "raises ArgumentError on empty-vs-nonempty length mismatch" do
       assert_raise ArgumentError, ~r/length/, fn ->
-        Crossover.pmx(%Permutation{genes: []}, %Permutation{genes: [0]}, %{})
+        Crossover.pmx(%Permutation{genes: []}, %Permutation{genes: [0]}, [])
       end
     end
   end
@@ -132,14 +132,14 @@ defmodule Petri.Crossover.PermutationTest do
     test "returns a two-element tuple of offspring for every seed" do
       for seed <- @cx_validity_seeds do
         seed(seed)
-        assert match?({%Permutation{}, %Permutation{}}, Crossover.cx(@p0, @p1, %{}))
+        assert match?({%Permutation{}, %Permutation{}}, Crossover.cx(@p0, @p1, []))
       end
     end
 
     test "both offspring are valid permutations" do
       for seed <- @cx_validity_seeds do
         seed(seed)
-        {o0, o1} = Crossover.cx(@p0, @p1, %{})
+        {o0, o1} = Crossover.cx(@p0, @p1, [])
 
         assert Petri.Chromosome.valid?(o0), "seed=#{seed}: o0 is not valid"
         assert Petri.Chromosome.valid?(o1), "seed=#{seed}: o1 is not valid"
@@ -149,7 +149,7 @@ defmodule Petri.Crossover.PermutationTest do
     test "returns parents unchanged for length-1 chromosomes" do
       p0 = %Permutation{genes: [0]}
       p1 = %Permutation{genes: [0]}
-      {o0, o1} = Crossover.cx(p0, p1, %{})
+      {o0, o1} = Crossover.cx(p0, p1, [])
       assert o0.genes == [0]
       assert o1.genes == [0]
     end

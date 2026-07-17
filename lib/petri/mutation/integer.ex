@@ -4,8 +4,8 @@ defmodule Petri.Mutation.Integer do
 
   @doc "Gaussian mutation. Perturbs each gene with probability `mutation_per_gene_rate`."
   def gaussian(%Integer{genes: genes, bounds: bounds} = chromosome, config) do
-    sigma = config.gaussian_sigma
-    per_gene_rate = config.mutation_per_gene_rate
+    sigma = config[:gaussian_sigma]
+    per_gene_rate = config[:mutation_per_gene_rate]
 
     new_genes =
       Enum.zip(genes, bounds)
@@ -23,7 +23,7 @@ defmodule Petri.Mutation.Integer do
 
   @doc "Uniform mutation. Replaces each gene with a random value in its bounds."
   def uniform(%Integer{genes: genes, bounds: bounds} = chromsome, config) do
-    per_gene_rate = config.mutation_per_gene_rate
+    per_gene_rate = config[:mutation_per_gene_rate]
 
     new_genes =
       Enum.zip(genes, bounds)

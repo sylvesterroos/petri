@@ -78,7 +78,7 @@ defmodule FeatureSelection do
     # Bit-flip mutation toggles individual bits at a low per-gene rate
     # (~1/L so one bit flips per mutation event on average). This lets
     # the GA add or drop single features without disrupting the whole mask.
-    config = %{
+    config = [
         encoding: :binary,
         length: @n_features,
         population_size: 80,
@@ -92,9 +92,9 @@ defmodule FeatureSelection do
         mutation: :bit_flip,
         mutation_rate: 0.4,
         mutation_per_gene_rate: 1.0 / @n_features
-      }
+      ]
 
-    IO.puts("Running GA (#{config.max_generations} generations, pop #{config.population_size})...")
+    IO.puts("Running GA (#{config[:max_generations]} generations, pop #{config[:population_size]})...")
 
     result = Petri.run(fitness, config)
 

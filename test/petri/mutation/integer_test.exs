@@ -72,7 +72,7 @@ defmodule Petri.Mutation.IntegerTest do
 
     test "low sigma keeps genes close to originals" do
       parent = %IntChr{genes: [10, 10, 10], bounds: [{0, 100}, {0, 100}, {0, 100}]}
-      config = config(:integer, %{gaussian_sigma: 0.01})
+      config = config(:integer, [gaussian_sigma: 0.01])
 
       for s <- 1..100 do
         seed(s)
@@ -88,7 +88,7 @@ defmodule Petri.Mutation.IntegerTest do
 
     test "no mutation when rate is 0" do
       parent = %IntChr{genes: [5, 10, 15], bounds: [{0, 20}, {0, 20}, {0, 20}]}
-      config = config(:integer, %{mutation_per_gene_rate: 0.0})
+      config = config(:integer, [mutation_per_gene_rate: 0.0])
 
       seed(42)
       child = Mutation.gaussian(parent, config)
@@ -98,7 +98,7 @@ defmodule Petri.Mutation.IntegerTest do
 
     test "respects bounds even with high sigma" do
       parent = %IntChr{genes: [5, 5], bounds: [{0, 10}, {0, 10}]}
-      config = config(:integer, %{gaussian_sigma: 10.0})
+      config = config(:integer, [gaussian_sigma: 10.0])
 
       for s <- 1..200 do
         seed(s)
@@ -184,7 +184,7 @@ defmodule Petri.Mutation.IntegerTest do
 
     test "no mutation when rate is 0" do
       parent = %IntChr{genes: [5, 10, 15], bounds: [{0, 20}, {0, 20}, {0, 20}]}
-      config = config(:integer, %{mutation_per_gene_rate: 0.0})
+      config = config(:integer, [mutation_per_gene_rate: 0.0])
 
       seed(42)
       child = Mutation.uniform(parent, config)

@@ -11,13 +11,13 @@ defmodule Petri.EngineTest do
       result =
         Engine.run(
           fn c -> Petri.Chromosome.genes(c) |> Enum.sum() end,
-          %{
+          [
             encoding: :integer,
             bounds: [{0, 10}, {0, 10}, {0, 10}],
             population_size: 10,
             max_generations: 3,
             seed: 42
-          }
+          ]
         )
 
       assert %Result{} = result
@@ -27,13 +27,13 @@ defmodule Petri.EngineTest do
       result =
         Engine.run(
           fn c -> Petri.Chromosome.genes(c) |> Enum.sum() end,
-          %{
+          [
             encoding: :integer,
             bounds: [{0, 10}, {0, 10}, {0, 10}],
             population_size: 10,
             max_generations: 5,
             seed: 42
-          }
+          ]
         )
 
       {best_chromosome, _} = result.best
@@ -45,13 +45,13 @@ defmodule Petri.EngineTest do
       fitness = fn c -> Petri.Chromosome.genes(c) |> Enum.sum() end
 
       result =
-        Engine.run(fitness, %{
+        Engine.run(fitness, [
           encoding: :integer,
           bounds: [{0, 10}, {0, 10}, {0, 10}, {0, 10}, {0, 10}],
           population_size: 50,
           max_generations: 50,
           seed: 42
-        })
+        ])
 
       {_best_chromosome, best_fitness} = result.best
       assert best_fitness >= 30, "expected convergence toward 50, got #{best_fitness}"
@@ -61,7 +61,7 @@ defmodule Petri.EngineTest do
       result =
         Engine.run(
           fn c -> Petri.Chromosome.genes(c) |> Enum.sum() end,
-          %{
+          [
             encoding: :integer,
             bounds: [{0, 100}, {0, 100}],
             population_size: 30,
@@ -69,7 +69,7 @@ defmodule Petri.EngineTest do
             crossover: :sbx,
             mutation: :uniform,
             seed: 42
-          }
+          ]
         )
 
       {best_chromosome, _} = result.best
@@ -77,13 +77,13 @@ defmodule Petri.EngineTest do
     end
 
     test "integer encoding is deterministic with same seed" do
-      config = %{
+      config = [
         encoding: :integer,
         bounds: [{0, 10}, {0, 10}],
         population_size: 10,
         max_generations: 3,
         seed: 123
-      }
+      ]
 
       a = Engine.run(fn c -> Petri.Chromosome.genes(c) |> Enum.sum() end, config)
       b = Engine.run(fn c -> Petri.Chromosome.genes(c) |> Enum.sum() end, config)
@@ -95,14 +95,14 @@ defmodule Petri.EngineTest do
       result =
         Engine.run(
           fn c -> Petri.Chromosome.genes(c) |> Enum.sum() end,
-          %{
+          [
             encoding: :integer,
             bounds: [{0, 10}],
             population_size: 10,
             max_generations: 3,
             elite_count: 1,
             seed: 42
-          }
+          ]
         )
 
       assert result.evaluations == 10 + result.generations_run * 9
@@ -112,13 +112,13 @@ defmodule Petri.EngineTest do
       result =
         Engine.run(
           &fitness/1,
-          %{
+          [
             encoding: :permutation,
             n: 5,
             population_size: 10,
             max_generations: 3,
             seed: 42
-          }
+          ]
         )
 
       assert %Result{} = result
@@ -128,13 +128,13 @@ defmodule Petri.EngineTest do
       result =
         Engine.run(
           &fitness/1,
-          %{
+          [
             encoding: :permutation,
             n: 5,
             population_size: 10,
             max_generations: 5,
             seed: 42
-          }
+          ]
         )
 
       assert result.generations_run == 5
@@ -145,14 +145,14 @@ defmodule Petri.EngineTest do
       result =
         Engine.run(
           fn _ -> 1.0 end,
-          %{
+          [
             encoding: :permutation,
             n: 5,
             population_size: 10,
             max_generations: 100,
             fitness_threshold: 1.0,
             seed: 42
-          }
+          ]
         )
 
       assert result.generations_run == 0
@@ -163,13 +163,13 @@ defmodule Petri.EngineTest do
       result =
         Engine.run(
           &fitness/1,
-          %{
+          [
             encoding: :permutation,
             n: 5,
             population_size: 10,
             max_generations: 3,
             seed: 42
-          }
+          ]
         )
 
       {best_chromosome, _fitness} = result.best
@@ -182,27 +182,27 @@ defmodule Petri.EngineTest do
       result =
         Engine.run(
           &fitness/1,
-          %{
+          [
             encoding: :permutation,
             n: 5,
             population_size: 10,
             max_generations: 3,
             elite_count: 1,
             seed: 42
-          }
+          ]
         )
 
       assert result.evaluations == 10 + result.generations_run * 9
     end
 
     test "is deterministic with the same seed" do
-      config = %{
+      config = [
         encoding: :permutation,
         n: 5,
         population_size: 10,
         max_generations: 3,
         seed: 123
-      }
+      ]
 
       a = Engine.run(&fitness/1, config)
       b = Engine.run(&fitness/1, config)
@@ -212,7 +212,7 @@ defmodule Petri.EngineTest do
 
     test "raises on invalid config" do
       assert_raise ArgumentError, fn ->
-        Engine.run(&fitness/1, %{encoding: :permutation, population_size: 10})
+        Engine.run(&fitness/1, [encoding: :permutation, population_size: 10])
       end
     end
   end

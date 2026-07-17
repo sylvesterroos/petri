@@ -12,7 +12,7 @@ defmodule Petri.Crossover.Real do
   See Eshelman & Schaffer 1993.
   """
   def blx_alpha(%Real{genes: p0, bounds: bounds}, %Real{genes: p1, bounds: _}, config) do
-    alpha = config.blx_alpha_param
+    alpha = config[:blx_alpha_param]
 
     {c0, c1} =
       Enum.zip([p0, p1, bounds])
@@ -45,7 +45,7 @@ defmodule Petri.Crossover.Real do
   See Deb & Agrawal 1995.
   """
   def sbx(%Real{genes: p0, bounds: bounds}, %Real{genes: p1, bounds: _}, config) do
-    eta = config.sbx_eta
+    eta = config[:sbx_eta]
 
     {c0, c1} =
       Enum.zip([p0, p1, bounds])

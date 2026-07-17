@@ -11,60 +11,60 @@ defmodule Petri.TestHelpers do
   Seeds the process-local `:rand` module with the given integer.
   """
   def seed(n) when is_integer(n) do
-    Petri.RNG.maybe_seed(%{seed: n})
+    Petri.RNG.maybe_seed(seed: n)
   end
 
   @doc """
-  Returns a base config map for the given encoding, merged with overrides.
+  Returns a base config keyword list for the given encoding, merged with overrides.
 
   Use in operator tests that need a config with the right keys present.
   """
-  def config(encoding, overrides \\ %{})
+  def config(encoding, overrides \\ [])
 
   def config(:real, overrides) do
-    Map.merge(
-      %{
+    Keyword.merge(
+      [
         blx_alpha_param: 0.5,
         sbx_eta: 2.0,
         gaussian_sigma: 0.1,
         mutation_per_gene_rate: 1.0,
         crossover_rate: 0.9,
         mutation_rate: 0.1
-      },
+      ],
       overrides
     )
   end
 
   def config(:permutation, overrides) do
-    Map.merge(
-      %{
+    Keyword.merge(
+      [
         crossover_rate: 0.9,
         mutation_rate: 0.1
-      },
+      ],
       overrides
     )
   end
 
   def config(:integer, overrides) do
-    Map.merge(
-      %{
+    Keyword.merge(
+      [
         blx_alpha_param: 0.5,
         sbx_eta: 2.0,
         gaussian_sigma: 0.1,
         mutation_per_gene_rate: 1.0,
         crossover_rate: 0.9,
         mutation_rate: 0.1
-      },
+      ],
       overrides
     )
   end
 
   def config(:binary, overrides) do
-    Map.merge(
-      %{
+    Keyword.merge(
+      [
         crossover_rate: 0.9,
         mutation_rate: 0.1
-      },
+      ],
       overrides
     )
   end

@@ -14,7 +14,7 @@ defmodule Petri.Selection do
 
   Valid operators: `:tournament`, `:roulette`, `:rank`, `:sus`.
 
-  The `config` map must contain `:population_size`. Tournament selection
+  The `config` keyword list must contain `:population_size`. Tournament selection
   also reads `:tournament_size` (defaults to 3).
 
   ## Example
@@ -24,12 +24,12 @@ defmodule Petri.Selection do
       ...>   {%Petri.Chromosome.Binary{genes: [1, 1, 0]}, 2.0},
       ...>   {%Petri.Chromosome.Binary{genes: [1, 1, 1]}, 3.0}
       ...> ]
-      iex> parents = Petri.Selection.select(:tournament, pop, %{population_size: 2, tournament_size: 2})
+      iex> parents = Petri.Selection.select(:tournament, pop, [population_size: 2, tournament_size: 2])
       iex> length(parents)
       2
   """
   def select(selection, population, config)
-      when is_atom(selection) and is_list(population) and is_map(config) do
+      when is_atom(selection) and is_list(population) and is_list(config) do
     case selection do
       :sus -> stochastic_universal_sampling(population, config)
       :tournament -> tournament_selection(population, config)
@@ -45,10 +45,10 @@ defmodule Petri.Selection do
   Fast, works with negative fitness, and doesn't require fitness scaling.
   """
   def tournament_selection(population, config)
-      when is_list(population) and is_map(config) do
+      when is_list(population) and is_list(config) do
     if length(population) == 0, do: raise(ArgumentError, "empty population")
-    n = Map.fetch!(config, :population_size)
-    tournament_size = config.tournament_size
+    n = Keyword.fetch!(config, :population_size)
+    tournament_size = config[:tournament_size]
 
     Enum.map(1..n, fn _ ->
       contestants = Enum.take_random(population, tournament_size)
@@ -63,9 +63,9 @@ defmodule Petri.Selection do
   Requires all fitness values to be non-negative and total fitness > 0.
   """
   def roulette_selection(population, config)
-      when is_list(population) and is_map(config) do
+      when is_list(population) and is_list(config) do
     if length(population) == 0, do: raise(ArgumentError, "empty population")
-    n = Map.fetch!(config, :population_size)
+    n = Keyword.fetch!(config, :population_size)
 
     total_fitness =
       Enum.reduce(population, 0.0, fn {_, fitness}, acc ->
@@ -89,9 +89,9 @@ defmodule Petri.Selection do
   won't dominate the selection pool.
   """
   def rank_selection(population, config)
-      when is_list(population) and is_map(config) do
+      when is_list(population) and is_list(config) do
     if length(population) == 0, do: raise(ArgumentError, "empty population")
-    n = Map.fetch!(config, :population_size)
+    n = Keyword.fetch!(config, :population_size)
 
     sorted = Enum.sort_by(population, fn {_, fitness} -> fitness end)
 
@@ -113,9 +113,9 @@ defmodule Petri.Selection do
   times, giving lower variance than repeated roulette spins.
   """
   def stochastic_universal_sampling(population, config)
-      when is_list(population) and is_map(config) do
+      when is_list(population) and is_list(config) do
     if length(population) == 0, do: raise(ArgumentError, "empty population")
-    n = Map.fetch!(config, :population_size)
+    n = Keyword.fetch!(config, :population_size)
 
     total_fitness =
       Enum.reduce(population, 0.0, fn {_, fitness}, acc ->

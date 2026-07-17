@@ -31,7 +31,7 @@ fitness = fn %Permutation{genes: tour} ->
 end
 
 result =
-  Petri.run(fitness, %{
+  Petri.run(fitness, [
     encoding: :permutation,
     n: 52,
     population_size: 400,
@@ -42,7 +42,7 @@ result =
     elite_count: 8,
     crossover: :ox,
     mutation: :inversion
-  })
+  ])
 
 {best_tour, _best_fitness} = result.best
 ```

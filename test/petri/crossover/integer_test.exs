@@ -236,9 +236,9 @@ defmodule Petri.Crossover.IntegerTest do
 
     test "higher eta produces offspring closer to parents" do
       seed(42)
-      {lo_eta_o0, _} = Crossover.sbx(@p0, @p1, config(:integer, %{sbx_eta: 1.0}))
+      {lo_eta_o0, _} = Crossover.sbx(@p0, @p1, config(:integer, [sbx_eta: 1.0]))
       seed(42)
-      {hi_eta_o0, _} = Crossover.sbx(@p0, @p1, config(:integer, %{sbx_eta: 100.0}))
+      {hi_eta_o0, _} = Crossover.sbx(@p0, @p1, config(:integer, [sbx_eta: 100.0]))
 
       # With very high eta, offspring should be very close to parents
       # This is a soft check — the genes should be closer on average

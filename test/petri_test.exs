@@ -9,26 +9,26 @@ defmodule PetriTest do
   describe "configure/1" do
     test "returns an ok tuple with a validated permutation config" do
       assert {:ok, config} =
-               Petri.configure(%{
+               Petri.configure([
                  encoding: :permutation,
                  n: 8,
                  population_size: 20,
                  max_generations: 10
-               })
+               ])
 
-      assert config.encoding == :permutation
-      assert config.n == 8
-      assert config.population_size == 20
-      assert config.max_generations == 10
-      assert config.selection == :sus
-      assert config.crossover == :pmx
-      assert config.mutation == :swap
-      assert config.elite_count == 2
+      assert config[:encoding] == :permutation
+      assert config[:n] == 8
+      assert config[:population_size] == 20
+      assert config[:max_generations] == 10
+      assert config[:selection] == :sus
+      assert config[:crossover] == :pmx
+      assert config[:mutation] == :swap
+      assert config[:elite_count] == 2
     end
 
     test "preserves explicit permutation operator choices" do
       assert {:ok, config} =
-               Petri.configure(%{
+               Petri.configure([
                  encoding: :permutation,
                  n: 5,
                  population_size: 10,
@@ -38,44 +38,44 @@ defmodule PetriTest do
                  mutation: :inversion,
                  elite_count: 0,
                  seed: 42
-               })
+               ])
 
-      assert config.selection == :tournament
-      assert config.crossover == :ox
-      assert config.mutation == :inversion
-      assert config.elite_count == 0
-      assert config.seed == 42
+      assert config[:selection] == :tournament
+      assert config[:crossover] == :ox
+      assert config[:mutation] == :inversion
+      assert config[:elite_count] == 0
+      assert config[:seed] == 42
     end
 
     test "returns an error tuple for a missing termination condition" do
       assert {:error, errors} =
-               Petri.configure(%{
+               Petri.configure([
                  encoding: :permutation,
                  n: 5,
                  population_size: 10
-               })
+               ])
 
       assert Zoi.prettify_errors(errors) == "at least one termination condition is required"
     end
 
     test "returns an error tuple for a missing required field" do
       assert {:error, _errors} =
-               Petri.configure(%{
+               Petri.configure([
                  encoding: :permutation,
                  population_size: 10,
                  max_generations: 5
-               })
+               ])
     end
 
     test "returns an error tuple for an invalid permutation operator" do
       assert {:error, _errors} =
-               Petri.configure(%{
+               Petri.configure([
                  encoding: :permutation,
                  n: 5,
                  population_size: 10,
                  max_generations: 5,
                  crossover: :blx_alpha
-               })
+               ])
     end
   end
 
@@ -84,13 +84,13 @@ defmodule PetriTest do
       result =
         Petri.run(
           &tsp_fitness/1,
-          %{
+          [
             encoding: :permutation,
             n: 5,
             population_size: 10,
             max_generations: 3,
             seed: 42
-          }
+          ]
         )
 
       assert %Result{} = result
@@ -110,13 +110,13 @@ defmodule PetriTest do
 
     test "accepts a config validated by configure/1" do
       {:ok, config} =
-        Petri.configure(%{
+        Petri.configure([
           encoding: :permutation,
           n: 5,
           population_size: 10,
           max_generations: 3,
           seed: 42
-        })
+        ])
 
       result = Petri.run(&tsp_fitness/1, config)
       assert %Result{} = result
@@ -126,15 +126,15 @@ defmodule PetriTest do
       assert result.evaluations == 10 + 3 * 8
     end
 
-    test "validates a raw config map before running" do
+    test "validates a raw config before running" do
       assert_raise ArgumentError, fn ->
         Petri.run(
           &tsp_fitness/1,
-          %{
+          [
             encoding: :permutation,
             n: 5,
             population_size: 10
-          }
+          ]
         )
       end
     end
@@ -143,13 +143,13 @@ defmodule PetriTest do
       result =
         Petri.run(
           &tsp_fitness/1,
-          %{
+          [
             encoding: :permutation,
             n: 5,
             population_size: 10,
             max_generations: 7,
             seed: 42
-          }
+          ]
         )
 
       assert result.generations_run == 7
@@ -159,14 +159,14 @@ defmodule PetriTest do
       result =
         Petri.run(
           fn _ -> 1.0 end,
-          %{
+          [
             encoding: :permutation,
             n: 5,
             population_size: 10,
             max_generations: 100,
             fitness_threshold: 1.0,
             seed: 42
-          }
+          ]
         )
 
       assert result.generations_run == 0
@@ -174,13 +174,13 @@ defmodule PetriTest do
     end
 
     test "is deterministic with the same seed" do
-      config = %{
+      config = [
         encoding: :permutation,
         n: 5,
         population_size: 10,
         max_generations: 3,
         seed: 123
-      }
+      ]
 
       a = Petri.run(&tsp_fitness/1, config)
       b = Petri.run(&tsp_fitness/1, config)
@@ -192,13 +192,13 @@ defmodule PetriTest do
       result =
         Petri.run(
           &tsp_fitness/1,
-          %{
+          [
             encoding: :permutation,
             n: 5,
             population_size: 10,
             max_generations: 5,
             seed: 42
-          }
+          ]
         )
 
       {best_chromosome, _fitness} = result.best
@@ -210,13 +210,13 @@ defmodule PetriTest do
       result =
         Petri.run(
           &tsp_fitness/1,
-          %{
+          [
             encoding: :permutation,
             n: 5,
             population_size: 10,
             max_generations: 4,
             seed: 42
-          }
+          ]
         )
 
       # 10 initial evaluations plus 8 offspring per generation with elite_count=2.
@@ -252,14 +252,14 @@ defmodule PetriTest do
       result =
         Petri.run(
           fitness_fn,
-          %{
+          [
             encoding: :permutation,
             n: 4,
             population_size: 30,
             max_generations: 50,
             fitness_threshold: 1.0 / 6.0,
             seed: 7
-          }
+          ]
         )
 
       assert %Result{} = result

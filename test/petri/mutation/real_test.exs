@@ -14,7 +14,7 @@ defmodule Petri.Mutation.RealTest do
       child =
         RealMutation.gaussian(
           parent,
-          config(:real, %{mutation_per_gene_rate: 1.0, gaussian_sigma: 0.5})
+          config(:real, [mutation_per_gene_rate: 1.0, gaussian_sigma: 0.5])
         )
 
       assert Petri.Chromosome.valid?(child)
@@ -31,7 +31,7 @@ defmodule Petri.Mutation.RealTest do
       child =
         RealMutation.gaussian(
           parent,
-          config(:real, %{mutation_per_gene_rate: 0.0, gaussian_sigma: 0.5})
+          config(:real, [mutation_per_gene_rate: 0.0, gaussian_sigma: 0.5])
         )
 
       assert Petri.Chromosome.valid?(child)
@@ -47,7 +47,7 @@ defmodule Petri.Mutation.RealTest do
         child =
           RealMutation.gaussian(
             parent,
-            config(:real, %{mutation_per_gene_rate: 1.0, gaussian_sigma: 0.5})
+            config(:real, [mutation_per_gene_rate: 1.0, gaussian_sigma: 0.5])
           )
 
         assert Petri.Chromosome.valid?(child)
@@ -56,7 +56,7 @@ defmodule Petri.Mutation.RealTest do
 
     test "is deterministic with the same seed" do
       parent = %Real{genes: [0.5, 0.5], bounds: [{0.0, 1.0}, {0.0, 1.0}]}
-      conf = config(:real, %{mutation_per_gene_rate: 1.0, gaussian_sigma: 0.5})
+      conf = config(:real, [mutation_per_gene_rate: 1.0, gaussian_sigma: 0.5])
 
       seed(7)
       first = RealMutation.gaussian(parent, conf)
@@ -74,7 +74,7 @@ defmodule Petri.Mutation.RealTest do
       child =
         RealMutation.gaussian(
           parent,
-          config(:real, %{mutation_per_gene_rate: 1.0, gaussian_sigma: 10.0})
+          config(:real, [mutation_per_gene_rate: 1.0, gaussian_sigma: 10.0])
         )
 
       child_genes = Petri.Chromosome.genes(child)
@@ -87,7 +87,7 @@ defmodule Petri.Mutation.RealTest do
     test "replaces genes within bounds when per_gene_rate is 1.0" do
       seed(42)
       parent = %Real{genes: [0.5, 0.5], bounds: [{0.0, 1.0}, {0.0, 1.0}]}
-      child = RealMutation.uniform(parent, config(:real, %{mutation_per_gene_rate: 1.0}))
+      child = RealMutation.uniform(parent, config(:real, [mutation_per_gene_rate: 1.0]))
 
       assert Petri.Chromosome.valid?(child)
       assert Petri.Chromosome.length(child) == 2
@@ -99,7 +99,7 @@ defmodule Petri.Mutation.RealTest do
     test "leaves genes unchanged when per_gene_rate is 0.0" do
       seed(42)
       parent = %Real{genes: [0.5, 0.5], bounds: [{0.0, 1.0}, {0.0, 1.0}]}
-      child = RealMutation.uniform(parent, config(:real, %{mutation_per_gene_rate: 0.0}))
+      child = RealMutation.uniform(parent, config(:real, [mutation_per_gene_rate: 0.0]))
 
       assert Petri.Chromosome.valid?(child)
       assert Petri.Chromosome.genes(child) == parent.genes
@@ -107,7 +107,7 @@ defmodule Petri.Mutation.RealTest do
 
     test "is deterministic with the same seed" do
       parent = %Real{genes: [0.5, 0.5], bounds: [{0.0, 1.0}, {0.0, 1.0}]}
-      conf = config(:real, %{mutation_per_gene_rate: 1.0})
+      conf = config(:real, [mutation_per_gene_rate: 1.0])
 
       seed(7)
       first = RealMutation.uniform(parent, conf)

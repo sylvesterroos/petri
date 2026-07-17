@@ -27,7 +27,7 @@ defmodule Petri.Engine do
       last_improvement_generation: 0,
       elapsed_ms: 0,
       started_at_ms: System.monotonic_time(:millisecond),
-      evaluations: config.population_size
+      evaluations: config[:population_size]
     }
 
     {final_best, final_history, final_state} =
@@ -43,21 +43,24 @@ defmodule Petri.Engine do
     end
   end
 
-  defp init_population(%{encoding: :real, initialization: initialization} = config) do
-    case initialization do
-      :lhs -> Initialization.init_latin_hypercube(config)
-      :random -> random_population(config)
-    end
-  end
+  defp init_population(config) do
+    encoding = config[:encoding]
 
-  defp init_population(%{encoding: encoding, initialization: :random} = config)
-       when encoding in [:permutation, :binary, :integer] do
-    random_population(config)
+    case encoding do
+      :real ->
+        case config[:initialization] do
+          :lhs -> Initialization.init_latin_hypercube(config)
+          :random -> random_population(config)
+        end
+
+      _ ->
+        random_population(config)
+    end
   end
 
   defp random_population(config) do
     Stream.repeatedly(fn -> Initialization.init_random(config) end)
-    |> Enum.take(config.population_size)
+    |> Enum.take(config[:population_size])
   end
 
   defp loop(population, best, history, state, config, fitness_fn) do
@@ -66,7 +69,7 @@ defmodule Petri.Engine do
     if Termination.stop?(config, state) do
       {best, Enum.reverse(history), state}
     else
-      parents = Selection.select(config.selection, population, config)
+      parents = Selection.select(config[:selection], population, config)
       offspring_chromosomes = reproduce(parents, config)
       mutated = Enum.map(offspring_chromosomes, fn c -> mutate(c, config) end)
 
@@ -98,7 +101,7 @@ defmodule Petri.Engine do
   end
 
   defp reproduce(parents, config) do
-    target = config.population_size - config.elite_count
+    target = config[:population_size] - config[:elite_count]
 
     parents
     |> Stream.chunk_every(2)
@@ -113,90 +116,36 @@ defmodule Petri.Engine do
     |> Enum.take(max(target, 0))
   end
 
-  defp crossover_pair(
-         {c0, _},
-         {c1, _},
-         %{encoding: :permutation, crossover: crossover, crossover_rate: rate} = config
-       ) do
-    if :rand.uniform() <= rate do
-      Petri.Operator.Permutation.crossover(crossover).(c0, c1, config)
+  defp crossover_pair({c0, _}, {c1, _}, config) do
+    if :rand.uniform() <= config[:crossover_rate] do
+      case config[:encoding] do
+        :permutation -> Petri.Operator.Permutation.crossover(config[:crossover]).(c0, c1, config)
+        :real -> Petri.Operator.Real.crossover(config[:crossover]).(c0, c1, config)
+        :binary -> Petri.Operator.Binary.crossover(config[:crossover]).(c0, c1, config)
+        :integer -> Petri.Operator.Integer.crossover(config[:crossover]).(c0, c1, config)
+      end
     else
       {c0, c1}
     end
   end
 
-  defp crossover_pair(
-         {c0, _},
-         {c1, _},
-         %{encoding: :real, crossover: crossover, crossover_rate: rate} = config
-       ) do
-    if :rand.uniform() <= rate do
-      Petri.Operator.Real.crossover(crossover).(c0, c1, config)
-    else
-      {c0, c1}
-    end
-  end
-
-  defp crossover_pair(
-         {c0, _},
-         {c1, _},
-         %{encoding: :binary, crossover: crossover, crossover_rate: rate} = config
-       ) do
-    if :rand.uniform() <= rate do
-      Petri.Operator.Binary.crossover(crossover).(c0, c1, config)
-    else
-      {c0, c1}
-    end
-  end
-
-  defp crossover_pair(
-         {c0, _},
-         {c1, _},
-         %{encoding: :integer, crossover: crossover, crossover_rate: rate} = config
-       ) do
-    if :rand.uniform() <= rate do
-      Petri.Operator.Integer.crossover(crossover).(c0, c1, config)
-    else
-      {c0, c1}
-    end
-  end
-
-  defp mutate(
-         chromosome,
-         %{encoding: :permutation, mutation: mutation, mutation_rate: rate} = config
-       ) do
-    if :rand.uniform() <= rate do
-      Petri.Operator.Permutation.mutation(mutation).(chromosome, config)
+  defp mutate(chromosome, config) do
+    if :rand.uniform() <= config[:mutation_rate] do
+      case config[:encoding] do
+        :permutation -> Petri.Operator.Permutation.mutation(config[:mutation]).(chromosome, config)
+        :real -> Petri.Operator.Real.mutation(config[:mutation]).(chromosome, config)
+        :binary -> Petri.Operator.Binary.mutation(config[:mutation]).(chromosome, config)
+        :integer -> Petri.Operator.Integer.mutation(config[:mutation]).(chromosome, config)
+      end
     else
       chromosome
     end
   end
 
-  defp mutate(chromosome, %{encoding: :real, mutation: mutation, mutation_rate: rate} = config) do
-    if :rand.uniform() <= rate do
-      Petri.Operator.Real.mutation(mutation).(chromosome, config)
-    else
-      chromosome
-    end
-  end
+  defp replace(population, offspring, config) do
+    size = config[:population_size]
+    elite_count = config[:elite_count]
 
-  defp mutate(chromosome, %{encoding: :binary, mutation: mutation, mutation_rate: rate} = config) do
-    if :rand.uniform() <= rate do
-      Petri.Operator.Binary.mutation(mutation).(chromosome, config)
-    else
-      chromosome
-    end
-  end
-
-  defp mutate(chromosome, %{encoding: :integer, mutation: mutation, mutation_rate: rate} = config) do
-    if :rand.uniform() <= rate do
-      Petri.Operator.Integer.mutation(mutation).(chromosome, config)
-    else
-      chromosome
-    end
-  end
-
-  defp replace(population, offspring, %{population_size: size, elite_count: elite_count}) do
     elites =
       population
       |> Enum.sort_by(fn {_, fitness} -> fitness end, :desc)

@@ -13,7 +13,7 @@ defmodule Petri.Operator.PermutationTest do
       p1 = %Permutation{genes: [4, 3, 2, 1, 0]}
 
       fun = Operator.crossover(:ox)
-      {o0, o1} = fun.(p0, p1, %{})
+      {o0, o1} = fun.(p0, p1, [])
 
       assert %Permutation{} = o0
       assert %Permutation{} = o1
@@ -27,7 +27,7 @@ defmodule Petri.Operator.PermutationTest do
       p1 = %Permutation{genes: [4, 3, 2, 1, 0]}
 
       fun = Operator.crossover(:pmx)
-      {o0, o1} = fun.(p0, p1, %{})
+      {o0, o1} = fun.(p0, p1, [])
 
       assert %Permutation{} = o0
       assert %Permutation{} = o1
@@ -41,7 +41,7 @@ defmodule Petri.Operator.PermutationTest do
       p1 = %Permutation{genes: [4, 3, 2, 1, 0]}
 
       fun = Operator.crossover(:cx)
-      {o0, o1} = fun.(p0, p1, %{})
+      {o0, o1} = fun.(p0, p1, [])
 
       assert %Permutation{} = o0
       assert %Permutation{} = o1
@@ -56,7 +56,7 @@ defmodule Petri.Operator.PermutationTest do
       parent = %Permutation{genes: [0, 1, 2, 3, 4]}
 
       fun = Operator.mutation(:inversion)
-      child = fun.(parent, %{})
+      child = fun.(parent, [])
 
       assert %Permutation{} = child
       assert Petri.Chromosome.valid?(child)
@@ -67,7 +67,7 @@ defmodule Petri.Operator.PermutationTest do
       parent = %Permutation{genes: [0, 1, 2, 3, 4]}
 
       fun = Operator.mutation(:swap)
-      child = fun.(parent, %{})
+      child = fun.(parent, [])
 
       assert %Permutation{} = child
       assert Petri.Chromosome.valid?(child)
@@ -78,7 +78,7 @@ defmodule Petri.Operator.PermutationTest do
       parent = %Permutation{genes: [0, 1, 2, 3, 4]}
 
       fun = Operator.mutation(:insert)
-      child = fun.(parent, %{})
+      child = fun.(parent, [])
 
       assert %Permutation{} = child
       assert Petri.Chromosome.valid?(child)

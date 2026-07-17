@@ -4,7 +4,7 @@ defmodule Petri.Crossover.Integer do
 
   @doc "BLX-α crossover for integer chromosomes."
   def blx_alpha(%Integer{genes: p0, bounds: bounds}, %Integer{genes: p1, bounds: _}, config) do
-    alpha = config.blx_alpha_param
+    alpha = config[:blx_alpha_param]
 
     {c0, c1} =
       Enum.zip([p0, p1, bounds])
@@ -45,7 +45,7 @@ defmodule Petri.Crossover.Integer do
 
   @doc "SBX crossover for integer chromosomes."
   def sbx(%Integer{genes: p0, bounds: bounds}, %Integer{genes: p1, bounds: _}, config) do
-    eta = config.sbx_eta
+    eta = config[:sbx_eta]
 
     {c0, c1} =
       Enum.zip([p0, p1, bounds])

@@ -174,7 +174,7 @@ defmodule Petri.Config do
   @moduledoc """
   Typed config validation for `Petri.run/2`.
 
-  Uses [Zoi](https://hexdocs.pm/zoi) to validate the config map
+  Uses [Zoi](https://hexdocs.pm/zoi) to validate the config keyword list
   against a typed schema. Invalid configs return `{:error, reasons}`.
 
   ## Config fields
@@ -200,34 +200,40 @@ defmodule Petri.Config do
 
   ## Example
 
-      iex> {:ok, config} = Petri.Config.parse(%{
+      iex> {:ok, config} = Petri.Config.parse([
       ...>   encoding: :binary,
       ...>   length: 8,
       ...>   population_size: 20,
       ...>   max_generations: 10
-      ...> })
-      iex> config.encoding
+      ...> ])
+      iex> config[:encoding]
       :binary
 
-      iex> {:error, err} = Petri.Config.parse(%{
+      iex> {:error, err} = Petri.Config.parse([
       ...>   encoding: :binary,
       ...>   length: 8,
       ...>   population_size: 0,
       ...>   max_generations: 10
-      ...> })
+      ...> ])
       iex> is_list(err)
       true
   """
 
   @doc """
-  Parses and validates a map against the config schema.
+  Parses and validates a keyword list against the config schema.
 
-  Returns `{:ok, typed_map}` on success or `{:error, err}` on failure.
+  Returns `{:ok, keyword_list}` on success or `{:error, err}` on failure.
   """
   def parse(config) do
+    config_map = Map.new(config)
+
     @schema
     |> Zoi.refine(&termination?/1)
-    |> Zoi.parse(config)
+    |> Zoi.parse(config_map)
+    |> case do
+      {:ok, valid} -> {:ok, Map.to_list(valid)}
+      {:error, errors} -> {:error, errors}
+    end
   end
 
   defp termination?(config) do

@@ -79,7 +79,7 @@ defmodule TSP do
     # edge length matters locally. Inversion mutation reverses a random
     # segment, which is the classic 2-opt neighbourhood move and helps
     # untangle crossing edges.
-    config = %{
+    config = [
         encoding: :permutation,
         n: length(@cities),
         population_size: 400,
@@ -96,9 +96,9 @@ defmodule TSP do
         elite_count: 8,
         crossover: :ox,
         mutation: :inversion
-      }
+      ]
 
-    IO.puts("Running GA (#{config.max_generations} generations, pop #{config.population_size})...")
+    IO.puts("Running GA (#{config[:max_generations]} generations, pop #{config[:population_size]})...")
 
     result = Petri.run(fitness, config)
 
